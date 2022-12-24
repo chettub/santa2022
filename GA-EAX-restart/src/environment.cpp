@@ -67,9 +67,9 @@ void TEnvironment::define() {
         tKopt[i]->setInvNearList();
     }
 
-    fEdgeFreq = new ll*[N];
-    for (ll i = 0; i < N; ++i)
-        fEdgeFreq[i] = new ll[N];
+    fEdgeFreq = new int*[N];
+    for (int i = 0; i < N; ++i)
+        fEdgeFreq[i] = new int[N];
     this->fTimeStart = clock();
 
     kaizen.resize(Npop, true);

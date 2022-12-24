@@ -67,7 +67,7 @@ public:
 
     ll fBestNumOfGen;         /* The number of generations at which the current best solution was found */
     ll fBestAccumeratedNumCh; /* The accumulated number of offspring solutions at which the current best solution was found */
-    ll** fEdgeFreq;           /* The frequency of the edges of the population */
+    int** fEdgeFreq;          /* The frequency of the edges of the population */
     double fAverageValue;     /* The average tour lengths of the population */
     ll fBestValue;            /* The tour lenght of the best tour in the population */
     ll fBestIndex;            /* Index of the best population member */
