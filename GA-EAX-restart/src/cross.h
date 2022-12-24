@@ -28,9 +28,9 @@ class TCross {
 public:
     TCross(ll N);
     ~TCross();
-    void doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10], ll** fEdgeFreq); /* Main procedure of EAX */
-    void setParents(const TIndi& tPa1, const TIndi& tPa2, ll flagC[10], ll numOfKids);         /* Set information of the parent tours */
-    void setABcycle(const TIndi& parent1, const TIndi& parent2, ll flagC[10], ll numOfKids);   /* Step 2 of EAX */
+    void doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10], int** fEdgeFreq); /* Main procedure of EAX */
+    void setParents(const TIndi& tPa1, const TIndi& tPa2, ll flagC[10], ll numOfKids);          /* Set information of the parent tours */
+    void setABcycle(const TIndi& parent1, const TIndi& parent2, ll flagC[10], ll numOfKids);    /* Step 2 of EAX */
 
     void swap(ll& x, ll& y);                        /* Swap */
     void formABcycle();                             /* Store an AB-cycle found */
@@ -41,9 +41,9 @@ public:
     void backToPa1(TIndi& tKid);       /* Undo the parent p_A */
     void goToBest(TIndi& tKid);        /* Modify tKid to the best offspring solution */
 
-    void incrementEdgeFreq(ll** fEdgeFreq); /* Increment fEdgeFreq[][] */
-    ll calAdpLoss(ll** fEdgeFreq);          /* Compute the difference in the averate distance */
-    double calEntLoss(ll** fEdgeFreq);      /* Compute the difference in the edge entropy */
+    void incrementEdgeFreq(int** fEdgeFreq); /* Increment fEdgeFreq[][] */
+    ll calAdpLoss(int** fEdgeFreq);          /* Compute the difference in the averate distance */
+    double calEntLoss(int** fEdgeFreq);      /* Compute the difference in the edge entropy */
 
     /* Block2 */
     void setWeight(const TIndi& parent1, const TIndi& parent2);

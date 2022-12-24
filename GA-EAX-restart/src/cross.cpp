@@ -179,7 +179,7 @@ void TCross::setParents(const TIndi& tPa1, const TIndi& tPa2, ll flagC[10], ll n
     }
 }
 
-void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10], ll** fEdgeFreq) {
+void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10], int** fEdgeFreq) {
     ll Num;
     ll jnum, centerAB;
     ll gain;
@@ -890,7 +890,7 @@ void TCross::goToBest(TIndi& tKid) {
     }
 }
 
-void TCross::incrementEdgeFreq(ll** fEdgeFreq) {
+void TCross::incrementEdgeFreq(int** fEdgeFreq) {
     ll j, jnum, cem;
     ll r1, r2, b1, b2;
     ll aa, bb, a1;
@@ -938,7 +938,7 @@ void TCross::incrementEdgeFreq(ll** fEdgeFreq) {
     }
 }
 
-ll TCross::calAdpLoss(ll** fEdgeFreq) {
+ll TCross::calAdpLoss(int** fEdgeFreq) {
     ll j, jnum, cem;
     ll r1, r2, b1, b2;
     ll aa, bb, a1;
@@ -1050,7 +1050,7 @@ ll TCross::calAdpLoss(ll** fEdgeFreq) {
     return ll(DLoss / 2);
 }
 
-double TCross::calEntLoss(ll** fEdgeFreq) {
+double TCross::calEntLoss(int** fEdgeFreq) {
     ll j, jnum, cem;
     ll r1, r2, b1, b2;
     ll aa, bb, a1;

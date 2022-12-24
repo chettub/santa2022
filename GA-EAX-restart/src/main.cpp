@@ -16,13 +16,12 @@ using namespace std;
 
 using ll = long long;
 
-ll gBestValue = -1; // global best value
-TIndi gBest;        // global best solution
-ll optimum;         // optimum cost
-ll duration;        // used time
+ll gBestValue = -1;  // global best value
+TIndi gBest;         // global best solution
+ll optimum;          // optimum cost
+ll duration;         // used time
 
-void signalHandler(int signum)
-{
+void signalHandler(int signum) {
     cout << endl
          << "Signal (" << signum << ") received.\n";
     cout << endl;
@@ -31,13 +30,11 @@ void signalHandler(int signum)
     printf("bestval = %lld, optimum = %lld \n", gBestValue, optimum);
 
     ll Ncity = gBest.fN;
-    ll *Array = new ll[Ncity];
+    ll* Array = new ll[Ncity];
     ll curr = 0, st = 0, count = 0, pre = -1, next;
-    while (1)
-    {
+    while (1) {
         Array[count++] = curr + 1;
-        if (count > Ncity)
-        {
+        if (count > Ncity) {
             printf("Invalid\n");
             return;
         }
@@ -65,18 +62,16 @@ void signalHandler(int signum)
     exit(signum);
 }
 
-signed main(ll argc, char *argv[])
-{
+signed main(int argc, char* argv[]) {
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
-    TEnvironment *gEnv = new TEnvironment();
-    gEnv->fFileNameTSP = (char *)malloc(100);
+    TEnvironment* gEnv = new TEnvironment();
+    gEnv->fFileNameTSP = (char*)malloc(100);
 
     // ./GA-EAX-restart tsp_file NPOP NCH optimum tmax
     // default: 100, 30, -1(unknown optimum), 3600
-    if (argc != 8)
-    {
+    if (argc != 8) {
         cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax seed Nthread\n";
         exit(-1);
     }
@@ -91,8 +86,7 @@ signed main(ll argc, char *argv[])
 
     cout << "Initialization ..." << endl;
     gEnv->define();
-    for (ll n = 0; n < 1000000; ++n)
-    {
+    for (ll n = 0; n < 1000000; ++n) {
         printf("Run %lld\n", n);
         gEnv->doIt();
         if (gEnv->terminate)
