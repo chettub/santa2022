@@ -71,18 +71,22 @@ signed main(int argc, char* argv[]) {
 
     // ./GA-EAX-restart tsp_file NPOP NCH optimum tmax
     // default: 100, 30, -1(unknown optimum), 3600
-    if (argc != 8) {
-        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax seed Nthread\n";
+    if (argc != 8 && argc != 9) {
+        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax seed Nthread [gain_constraint]\n";
         exit(-1);
     }
     gEnv->fFileNameTSP = argv[1];
     gEnv->Npop = atoi(argv[2]);
     gEnv->Nch = atoi(argv[3]);
     optimum = gEnv->optimum = atoi(argv[4]);
-    gEnv->tmax = atoi(argv[5]);
+    gEnv->tmax = atoll(argv[5]);
     InitURandom(atoi(argv[6]));
     gEnv->terminate = false;
     gEnv->Nthread = atoi(argv[7]);
+    if (argc >= 9)
+        gEnv->GainConstraint = atoi(argv[8]);
+    else
+        gEnv->GainConstraint = 0;
 
     cout << "Initialization ..." << endl;
     gEnv->define();

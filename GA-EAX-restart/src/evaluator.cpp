@@ -381,7 +381,37 @@ bool TEvaluator::checkValid(ll* array, ll value) {
     distance += funcEdgeDis(array[Ncity - 1] - 1, array[0] - 1);
 
     delete[] check;
+
+    // NEW
+    return true;
+    // END
+
     if (distance != value)
         return false;
     return true;
+}
+
+ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
+    if (GainConstraint == 0ll)
+        return 0ll;
+    int Nviolation = 0;
+    for (int curr : {indi.fLink[encode(Center, Center)][0], indi.fLink[encode(Center, Center)][1]}) {
+        int pre = encode(Center, Center);
+        int cntyplus = 0, cntyminus = 0;
+        do {
+            auto [x1, y1] = decode(pre);
+            auto [x2, y2] = decode(curr);
+            cntyplus += y2 > y1;
+            cntyminus += y2 < y1;
+            if (x2 < Center) {
+                Nviolation++;
+                break;
+            }
+            int next = indi.fLink[curr][0] + indi.fLink[curr][1] - pre;
+            pre = curr;
+            curr = next;
+        } while (cntyplus < 64 && cntyminus < 64);
+    }
+    ll cost = GainConstraint * Magnification * Nviolation;
+    return cost;
 }

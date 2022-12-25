@@ -38,6 +38,7 @@ TEnvironment::~TEnvironment() {
 
 void TEnvironment::define() {
     fEvaluator->setInstance(fFileNameTSP);
+    fEvaluator->GainConstraint = this->GainConstraint;
     ll N = fEvaluator->Ncity;
     fIndexForMating = new ll[Npop + 1];
     tCurPop = new TIndi[Npop];
@@ -311,8 +312,9 @@ void TEnvironment::initPop() {
         for (int i = 0; i < Nthread; i++) {
             int s = j_thread + i * Npop / Nthread;
             thread th([&](int s, int i) {
-                tKopt[i]->makeRandSol(tCurPop[s]); /* Make a random tour */
-                tKopt[i]->doIt(tCurPop[s]);        /* Apply the local search with the 2-opt neighborhood */
+                tKopt[i]->makeRandSol(tCurPop[s]);                                                   /* Make a random tour */
+                tKopt[i]->doIt(tCurPop[s]);                                                          /* Apply the local search with the 2-opt neighborhood */
+                tCurPop[s].fEvaluationValue += fEvaluator->funcCostConstraintViolation(tCurPop[s]);  // NEW
             },
                 s, i);
             threads.push_back(move(th));
@@ -320,6 +322,7 @@ void TEnvironment::initPop() {
         for (auto& th : threads)
             th.join();
     }
+
 
     // original
     // for (ll i = 0; i < Npop; ++i) {

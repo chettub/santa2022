@@ -187,6 +187,15 @@ void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10]
     double pollMax, poll;
     double DLoss;
 
+    // NEW
+    ll gainoffset = 0;
+    {
+        ll CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
+        gainoffset += CostConstraintViolation;
+    }
+    // END
+
+
     fEvalType = flagC[0];  // 1:Greedy, 2:---, 3:Distance, 4:Entropy
     fEsetType = flagC[1];  // 1:Single-AB, 2:Block2
 
@@ -246,6 +255,13 @@ void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10]
         this->makeUnit();
         this->makeCompleteSol(tKid);
         gain += fGainModi;
+
+        // NEW
+        {
+            ll CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
+            gain += gainoffset - CostConstraintViolation;
+        }
+        // END
 
         ++fNumOfGeneratedCh;
 

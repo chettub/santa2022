@@ -85,6 +85,7 @@ public:
     ll Nthread;
 
     vector<bool> kaizen;
+    ll GainConstraint;
 };
 
 #endif
