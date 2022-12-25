@@ -507,7 +507,7 @@ void TCross::formABcycle() {
     fC[cem + 1] = fC[1];
     diff = 0;
     for (j = 0; j < cem / 2; ++j)
-        diff = diff + eval->fEdgeDis[fC[2 * j]][fC[1 + 2 * j]] - eval->fEdgeDis[fC[1 + 2 * j]][fC[2 + 2 * j]];
+        diff = diff + eval->funcEdgeDis(fC[2 * j], fC[1 + 2 * j]) - eval->funcEdgeDis(fC[1 + 2 * j], fC[2 + 2 * j]);
 
     fGainAB[fNumOfABcycle] = diff;
     ++fNumOfABcycle;
@@ -632,7 +632,7 @@ void TCross::makeCompleteSol(TIndi& tKid) {
                         b = fListOfCenterUnit[s - 1 + 2 * j1];
                         for (j2 = 0; j2 < 2; ++j2) {
                             d = tKid.fLink[c][j2];
-                            diff = eval->fEdgeDis[a][b] + eval->fEdgeDis[c][d] - eval->fEdgeDis[a][c] - eval->fEdgeDis[b][d];
+                            diff = eval->funcEdgeDis(a, b) + eval->funcEdgeDis(c, d) - eval->funcEdgeDis(a, c) - eval->funcEdgeDis(b, d);
                             if (diff > max_diff) {
                                 aa = a;
                                 bb = b;
@@ -640,7 +640,7 @@ void TCross::makeCompleteSol(TIndi& tKid) {
                                 b1 = d;
                                 max_diff = diff;
                             }
-                            diff = eval->fEdgeDis[a][b] + eval->fEdgeDis[d][c] - eval->fEdgeDis[a][d] - eval->fEdgeDis[b][c];
+                            diff = eval->funcEdgeDis(a, b) + eval->funcEdgeDis(d, c) - eval->funcEdgeDis(a, d) - eval->funcEdgeDis(b, c);
                             if (diff > max_diff) {
                                 aa = a;
                                 bb = b;
@@ -671,7 +671,7 @@ void TCross::makeCompleteSol(TIndi& tKid) {
                     break;
                 }
             }
-            max_diff = eval->fEdgeDis[aa][bb] + eval->fEdgeDis[a1][b1] - eval->fEdgeDis[a][a1] - eval->fEdgeDis[b][b1];
+            max_diff = eval->funcEdgeDis(aa, bb) + eval->funcEdgeDis(a1, b1) - eval->funcEdgeDis(a, a1) - eval->funcEdgeDis(b, b1);
         }
 
         if (tKid.fLink[aa][0] == bb)

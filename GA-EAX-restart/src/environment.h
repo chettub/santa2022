@@ -29,6 +29,7 @@
 #include "kopt.h"
 #endif
 
+
 using ll = long long;
 
 class TEnvironment {
