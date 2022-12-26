@@ -395,6 +395,9 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
     if (GainConstraint == 0ll)
         return 0ll;
     int Nviolation = 0;
+    // 原点回りの制約
+    // (0,0)->(0,1)
+    // (0,0)->(1,0)
     for (int curr : {indi.fLink[encode(Center, Center)][0], indi.fLink[encode(Center, Center)][1]}) {
         int pre = encode(Center, Center);
         int cntyplus = 0, cntyminus = 0;
@@ -419,6 +422,62 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
             curr = next;
         } while (cntyplus < 64 && cntyminus < 64);
     }
+
+    // (-127,-127)->(-127,127) 上で曲がる
+    {
+        bool violation = true;
+        int x1 = 1;
+        for (int y1 = 2; y1 < 255; y1 += 2) {
+            int curr = encode(x1, y1);
+            for (auto& next : {indi.fLink[curr][0], indi.fLink[curr][1]}) {
+                auto [x2, y2] = decode(next);
+                if (x2 != x1) {
+                    violation = false;
+                    break;
+                }
+            }
+            if (!violation)
+                break;
+        }
+        Nviolation += violation;
+    }
+    // (-127,127)->(127,127) 上で曲がる
+    {
+        bool violation = true;
+        int y1 = 255;
+        for (int x1 = 2; x1 < 255; x1 += 2) {
+            int curr = encode(x1, y1);
+            for (auto& next : {indi.fLink[curr][0], indi.fLink[curr][1]}) {
+                auto [x2, y2] = decode(next);
+                if (y2 != y1) {
+                    violation = false;
+                    break;
+                }
+            }
+            if (!violation)
+                break;
+        }
+        Nviolation += violation;
+    }
+    // (127,-127)->(127,127) 上で曲がる
+    {
+        bool violation = true;
+        int x1 = 255;
+        for (int y1 = 2; y1 < 255; y1 += 2) {
+            int curr = encode(x1, y1);
+            for (auto& next : {indi.fLink[curr][0], indi.fLink[curr][1]}) {
+                auto [x2, y2] = decode(next);
+                if (x2 != x1) {
+                    violation = false;
+                    break;
+                }
+            }
+            if (!violation)
+                break;
+        }
+        Nviolation += violation;
+    }
+
     ll cost = GainConstraint * Magnification * Nviolation;
     return cost;
 }
