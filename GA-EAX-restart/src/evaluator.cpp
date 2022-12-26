@@ -398,12 +398,19 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
     for (int curr : {indi.fLink[encode(Center, Center)][0], indi.fLink[encode(Center, Center)][1]}) {
         int pre = encode(Center, Center);
         int cntyplus = 0, cntyminus = 0;
+        int cntxplus = 0, cntxminus = 0;
         do {
             auto [x1, y1] = decode(pre);
             auto [x2, y2] = decode(curr);
             cntyplus += y2 > y1;
             cntyminus += y2 < y1;
+            cntxplus += x2 > x1;
+            cntxminus += x2 < x1;
             if (x2 < Center) {
+                Nviolation++;
+                break;
+            }
+            if ((cntyplus + cntyminus) * 2 < cntxplus) {
                 Nviolation++;
                 break;
             }
