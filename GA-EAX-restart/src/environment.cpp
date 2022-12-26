@@ -2,6 +2,7 @@
 #include <math.h>
 #include <mutex>
 #include <thread>
+#include <time.h>
 #include <vector>
 
 #ifndef __ENVIRONMENT__
@@ -15,6 +16,7 @@ using ll = long long;
 extern ll gBestValue;
 extern TIndi gBest;
 extern ll duration;
+time_t start_time;
 
 void MakeRandSol(TEvaluator* eval, TIndi& indi);
 void Make2optSol(TEvaluator* eval, TIndi& indi);
@@ -81,7 +83,9 @@ void TEnvironment::doIt() {
     this->init();
     this->getEdgeFreq();
     this->fTimeEnd = clock();
-    duration = (ll)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+    // duration = (ll)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+    start_time = time(nullptr);
+    duration = difftime(time(nullptr), start_time);
 
     fill(kaizen.begin(), kaizen.end(), true);
 
@@ -99,8 +103,10 @@ void TEnvironment::doIt() {
         }
         if (fCurNumOfGen % 50 == 0) {
             this->fTimeEnd = clock();
-            duration = (ll)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+            // duration = (ll)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
+            duration = difftime(time(nullptr), start_time);
             printf("%lld:\t%lld:\t%lld\t%lf\n", fCurNumOfGen, duration, fBestValue, fAverageValue);
+            fflush(stdout);
             this->writeBest();
             // record time every 50 gens
             if (duration >= tmax)
