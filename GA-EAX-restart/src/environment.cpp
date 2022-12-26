@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <math.h>
 #include <mutex>
@@ -113,8 +114,14 @@ void TEnvironment::doIt() {
                 break;
         }
 
-        if (this->terminationCondition())
+        int stagepre = fStage;
+        if (this->terminationCondition()) {
+            this->writeAll("StageII_" + to_string(duration) + ".txt");
             break;
+        }
+        int stagecurr = fStage;
+        if (stagepre != stagecurr)
+            this->writeAll("StageI_" + to_string(duration) + ".txt");
 
         this->selectForMating();
 
@@ -391,5 +398,22 @@ void TEnvironment::writeBest() {
     sprintf(filename, "bestSolution.txt");
     fp = fopen(filename, "a");
     fEvaluator->writeTo(fp, gBest);
+    fclose(fp);
+}
+
+void TEnvironment::writeAll(const string path) {
+    FILE* fp;
+    const char* filename = path.data();
+
+    // sort indi by EvaluationValue
+    vector<pair<int, int>> V(Npop);
+    for (int i = 0; i < Npop; i++) {
+        V[i] = {tCurPop[i].fEvaluationValue, i};
+    }
+    sort(V.begin(), V.end());
+
+    fp = fopen(filename, "a");
+    for (auto& [val, i] : V)
+        fEvaluator->writeTo(fp, tCurPop[i]);
     fclose(fp);
 }
