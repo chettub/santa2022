@@ -20,6 +20,8 @@ ll gBestValue = -1;  // global best value
 TIndi gBest;         // global best solution
 ll optimum;          // optimum cost
 ll duration;         // used time
+                     //
+TEnvironment* gEnv = new TEnvironment();
 
 void signalHandler(int signum) {
     cout << endl
@@ -28,6 +30,8 @@ void signalHandler(int signum) {
 
     printf("Total time: %lld\n", duration);
     printf("bestval = %lld, optimum = %lld \n", gBestValue, optimum);
+
+    gEnv->writeAll("Interrupted_" + to_string(duration) + ".txt");
 
     ll Ncity = gBest.fN;
     ll* Array = new ll[Ncity];
@@ -49,9 +53,9 @@ void signalHandler(int signum) {
             break;
     }
     printf("%lld %lld\n", gBest.fN, gBest.fEvaluationValue);
-    for (ll i = 0; i < gBest.fN; ++i)
-        printf("%lld ", Array[i]);
-    printf("\n");
+    // for (ll i = 0; i < gBest.fN; ++i)
+    //     printf("%lld ", Array[i]);
+    // printf("\n");
 
     if (gBestValue != -1 && gBestValue <= optimum)
         printf("Successful\n");
@@ -66,7 +70,6 @@ signed main(int argc, char* argv[]) {
     signal(SIGTERM, signalHandler);
     signal(SIGINT, signalHandler);
 
-    TEnvironment* gEnv = new TEnvironment();
     gEnv->fFileNameTSP = (char*)malloc(100);
 
     // ./GA-EAX-restart tsp_file NPOP NCH optimum tmax

@@ -402,6 +402,8 @@ void TEnvironment::writeBest() {
 }
 
 void TEnvironment::writeAll(const string path) {
+    cout << "writing current population to file : " << path << endl;
+
     FILE* fp;
     const char* filename = path.data();
 
@@ -416,4 +418,6 @@ void TEnvironment::writeAll(const string path) {
     for (auto& [val, i] : V)
         fEvaluator->writeTo(fp, tCurPop[i]);
     fclose(fp);
+
+    cout << "finished writing" << endl;
 }
