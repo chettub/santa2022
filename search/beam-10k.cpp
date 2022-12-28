@@ -267,39 +267,32 @@ int main() {
     for (int i = 0; i < 4*8; i++) {
         links4.push_back(Link(4, i));
     }
-    cerr << "calc possible 64 positions" << endl;
-    vector<vector<bool>> ok64(n, vector<bool>(64*8, false));
+    cerr << "calc possible 64+32 positions" << endl;
+    vector<vector<vector<bool>>> ok6432(n, vector<vector<bool>>(64*8, vector<bool>(32*8, false)));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
         for (int j = 0; j < 64 * 8; j++) {
-            // cerr << j << " " << links64[j].x << " " << links64[j].y << endl;
-            int dx = pos[0] - links64[j].x;
-            int dy = pos[1] - links64[j].y;
-            if (abs(dx) <= 64 && abs(dy) <= 64)
-                ok64[i][j] = true;
+            for (int k = 0; k < 32 * 8; ++k) {
+                // cerr << j << " " << links64[j].x << " " << links64[j].y << endl;
+                int dx = pos[0] - links64[j].x - links32[k].x;
+                int dy = pos[1] - links64[j].y - links32[k].y;
+                if (abs(dx) <= 128-64-32 && abs(dy) <= 128-64-32)
+                    ok6432[i][j][k] = true;
+            }
         }        
     }
     for (int i = n - 2; i >= 0; i--) {
         for (int j = 0; j < 64 * 8; j++) {
-            ok64[i][j] = ok64[i][j] && (ok64[i+1][j] || ok64[i+1][(j+1)%(64*8)] || ok64[i+1][(j+64*8-1)%(64*8)]);
-        }        
+            for (int k = 0; k < 32 * 8; k++) {
+                ok6432[i][j][k] = ok6432[i][j][k] && 
+                            (ok6432[i+1][j][k] || ok6432[i+1][(j+1)%(64*8)][k] || ok6432[i+1][(j+64*8-1)%(64*8)][k]
+                            || ok6432[i+1][j][(k+1)%(32*8)] || ok6432[i+1][(j+1)%(64*8)][(k+1)%(32*8)] || ok6432[i+1][(j+64*8-1)%(64*8)][(k+1)%(32*8)]
+                            || ok6432[i+1][j][(k+32*8-1)%(32*8)] || ok6432[i+1][(j+1)%(64*8)][(k+32*8-1)%(32*8)] || ok6432[i+1][(j+64*8-1)%(64*8)][(k+32*8-1)%(32*8)]
+                            );
+            }        
+        }
     }
-    vector<vector<bool>> ok32(n, vector<bool>(32*8, false));
-    for (int i = 0; i < n; i++) {
-        auto pos = pos_list[i];
-        for (int j = 0; j < 32 * 8; j++) {
-            // cerr << j << " " << links32[j].x << " " << links32[j].y << endl;
-            int dx = pos[0] - links32[j].x;
-            int dy = pos[1] - links32[j].y;
-            if (abs(dx) <= 128-32 && abs(dy) <= 128-32)
-                ok32[i][j] = true;
-        }        
-    }
-    for (int i = n - 2; i >= 0; i--) {
-        for (int j = 0; j < 32 * 8; j++) {
-            ok32[i][j] = ok32[i][j] && (ok32[i+1][j] || ok32[i+1][(j+1)%(32*8)] || ok32[i+1][(j+32*8-1)%(32*8)]);
-        }        
-    }
+
     vector<vector<bool>> ok16(n, vector<bool>(16*8, false));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
@@ -445,7 +438,7 @@ int main() {
                                     c[ys[indexesy[k]]].move(ymove);
                                 }
                                 auto cc = get_config(c);
-                                if (counts_nxt.count(cc) == 0  && ok64[i+1][c[0].get_hash()]  && ok32[i+1][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
+                                if (counts_nxt.count(cc) == 0  && ok6432[i+1][c[0].get_hash()][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
                                     prevs.push_back((unsigned int)idx);
                                     states_nxt.push_back(c);
                                     counts_nxt.insert(cc);
@@ -458,7 +451,7 @@ int main() {
                         }
                     } else {
                         auto cc = get_config(c);
-                        if (counts_nxt.count(cc) == 0  && ok64[i+1][c[0].get_hash()]  && ok32[i+1][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
+                        if (counts_nxt.count(cc) == 0  && ok6432[i+1][c[0].get_hash()][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
                             prevs.push_back((unsigned int)idx);
                             states_nxt.push_back(c);
                             counts_nxt.insert(cc);
@@ -481,7 +474,7 @@ int main() {
                             c[ys[indexesy[k]]].move(ymove);
                         }
                         auto cc = get_config(c);
-                        if (counts_nxt.count(cc) == 0  && ok64[i+1][c[0].get_hash()]  && ok32[i+1][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
+                        if (counts_nxt.count(cc) == 0  && ok6432[i+1][c[0].get_hash()][c[1].get_hash()] && ok16[i+1][c[2].get_hash()]  && ok8[i+1][c[3].get_hash()] && ok4[i+1][c[4].get_hash()]) {
                             prevs.push_back((unsigned int)idx);
                             states_nxt.push_back(c);
                             counts_nxt.insert(cc);
