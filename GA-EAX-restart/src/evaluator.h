@@ -44,7 +44,7 @@ public:
     ll Magnification;
     ll INF;
     vector<vector<vector<double>>> Image;
-    ll GainConstraint;
+    double GainConstraint;
 };
 
 #endif

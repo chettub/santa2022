@@ -392,7 +392,7 @@ bool TEvaluator::checkValid(ll* array, ll value) {
 }
 
 ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
-    if (GainConstraint == 0ll)
+    if (GainConstraint == 0.0)
         return 0ll;
     int Nviolation = 0;
     // 原点回りの制約
@@ -478,6 +478,6 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
         Nviolation += violation;
     }
 
-    ll cost = GainConstraint * Magnification * Nviolation;
+    ll cost = ll(GainConstraint * double(Magnification * Nviolation));
     return cost;
 }

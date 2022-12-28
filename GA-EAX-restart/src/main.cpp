@@ -87,9 +87,9 @@ signed main(int argc, char* argv[]) {
     gEnv->terminate = false;
     gEnv->Nthread = atoi(argv[7]);
     if (argc >= 9)
-        gEnv->GainConstraint = atoi(argv[8]);
+        gEnv->GainConstraint = atof(argv[8]);
     else
-        gEnv->GainConstraint = 0;
+        gEnv->GainConstraint = 0.0;
 
     cout << "Initialization ..." << endl;
     gEnv->define();
