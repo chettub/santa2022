@@ -80,7 +80,7 @@ if uploaded_file is not None:
     lengths = []
     scores = []
     paths = []
-    for i in range(0, len(lines)-2, 2):
+    for i in range(0, len(lines)-1, 2):
         length, score = lines[i].split(" ")
         path = lines[i+1].split(" ")
         lengths.append(int(length))
@@ -94,7 +94,7 @@ if uploaded_file is not None:
     idx, score = chosen.split(":")
     idx = int(idx)
     path = paths[idx]
-    
+
     pos = []
     for r in df_image.itertuples():
         pos.append((r.x, r.y))
@@ -126,5 +126,8 @@ if uploaded_file is not None:
         cb = ColorBar(color_mapper=color_mapper)
         p.add_glyph(s, glyph)
         p.add_layout(cb, "right")
+    
+    st.sidebar.download_button("Download this solution", f"""{lengths[idx]} {int(scores[idx]*1000000)}\n{' '.join([str(p) for p in paths[idx]])}""", file_name=f"{idx}_{score}.txt")
+
 
 st.bokeh_chart(p, use_container_width=False)
