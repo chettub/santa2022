@@ -4,6 +4,12 @@ using lint         = long long;
 constexpr int inf  = 1 << 29;
 constexpr lint mod = 1000000007;
 
+auto start = chrono::system_clock::now();
+string gettime() {
+    int elapsed = (int)(chrono::duration_cast<chrono::milliseconds>(chrono::system_clock::now() - start).count()) / 1000;
+    return "elapsed time: " + to_string(elapsed);
+}
+
 class XorShift {
     uint32_t x, y, z, w, t;
 
@@ -200,6 +206,7 @@ vector<int> yuse = {0, 1, 2, 3, 4, 5, 6, 7};
 
 int main() {
     // std::srand(std::time(0));
+    // compute nCk combinations to list possible arm moves
     for (int i = 1; i <= 8; ++i) {
         for (int j = 1; j <= i; ++j) {
             foreach_comb(i, j, [&](int *indexes) {
@@ -235,6 +242,7 @@ int main() {
         cin >> links[i].x >> links[i].y;
     }
 
+    // path
     vector<vector<int>> pos_list;
     for (int i = 0; i < n; i++) {
         int x, y;
@@ -242,10 +250,7 @@ int main() {
         pos_list.push_back({x, y});
     }  
     
-    // n = 1000;
-    // pos_list.resize(1000);
-    cerr << "start" << endl;
-    bool ok = true;
+    cerr << gettime() << ": compute possible 64+32 positions by DP" << endl;
 
     vector<Link> links64;
     for (int i = 0; i < 64*8; i++) {
@@ -267,7 +272,6 @@ int main() {
     for (int i = 0; i < 4*8; i++) {
         links4.push_back(Link(4, i));
     }
-    cerr << "calc possible 64+32 positions" << endl;
     vector<vector<vector<bool>>> ok6432(n, vector<vector<bool>>(64*8, vector<bool>(32*8, false)));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
@@ -341,7 +345,7 @@ int main() {
             ok4[i][j] = ok4[i][j] && (ok4[i+1][j] || ok4[i+1][(j+1)%(4*8)] || ok4[i+1][(j+4*8-1)%(4*8)]);
         }        
     }
-    cerr << "start search" << endl;
+    cerr << gettime() << ": start beam search" << endl;
 
     vector<vector<lint>> all_states;
     vector<vector<unsigned int>> all_prevs;
@@ -353,6 +357,7 @@ int main() {
     all_states.push_back({get_links_hash(states[0])});
     all_prevs.push_back({(unsigned int)-1});
 
+    // initial beam search parameters
     int maxi = 10000;
     int mult = 2;
     int restart = 256;
@@ -362,16 +367,6 @@ int main() {
 
     for (int i = 0; i < (int) pos_list.size() - 1; ++i) {
         // states = all_states[all_states.size()-1];
-        cerr << i << ": " << pos_list[i][0] << " " << pos_list[i][1] << ": " << states.size() << endl;
-
-        while(width_decl[i] < 0) {
-            if (depth == 3) {
-                restart -= 256;
-            }
-            maxi /= 2;
-            depth--;
-            width_decl[i]++;
-        }
 
         int dx = pos_list[i+1][0] - pos_list[i][0];
         int dy = pos_list[i+1][1] - pos_list[i][1];
@@ -381,6 +376,18 @@ int main() {
         int absdy = abs(dy);
         vector<int> ymove = dy > 0 ? u : d;
         vector<int> yrev = dy > 0 ? d : u;
+
+        cerr << gettime() << ", step: " << i << ", pos: " << pos_list[i][0] << " " << pos_list[i][1] << ", dxdy: " << dx << " " << dy << ", num states: " << states.size() << endl;
+
+        // revert increased beam width after passing over bottleneck point
+        while(width_decl[i] < 0) {
+            if (depth == 3) {
+                restart -= 256;
+            }
+            maxi /= 2;
+            depth--;
+            width_decl[i]++;
+        }
 
         int mx = min(maxi, (int)states.size());
         vector<unsigned int> prevs;
@@ -423,11 +430,12 @@ int main() {
                         for (int k: yuse) {
                             if (c[k].can_move(ymove)) {
                                 bool ok = true;
-                                for (auto & xx: xs)
+                                for (auto & xx: xs) {
                                     if (k == xx) {
                                         ok = false;
                                         break;
                                     }
+                                }
                                 if (ok)
                                     ys.push_back(k);
                             }
@@ -490,7 +498,7 @@ int main() {
         }
 
         if (states_nxt.size() == 0) {
-            cerr << "no next candidates. Increase beam width. depth: " << depth << endl;
+            cerr << gettime() << ": no next candidates. Increase beam width. depth: " << depth << endl;
             if (depth < 5) {
                 maxi *= 2;
                 depth++;
@@ -541,26 +549,25 @@ int main() {
         counts_nxt.clear();
         chosen.clear();
     }
-    if (ok) {
-        cerr << "completed!" << endl;
-        int p = 0;
-        for(int i = n - 1; i >= 0; --i) {
-            lint state_hash = all_states[i][p];
-            vector<Link> links = get_links(state_hash);
 
-            // int x = 0;
-            // int y = 0;
-            // for (auto& l: links) {
-            //     x += l.x;
-            //     y += l.y;
-            // }
-            // cout << x << " " << y << " ";
+    cerr << gettime() << ": completed!" << endl;
+    int p = 0;
+    for(int i = n - 1; i >= 0; --i) {
+        lint state_hash = all_states[i][p];
+        vector<Link> links = get_links(state_hash);
 
-            for(auto rr: links)
-                cout << rr.x << " " << rr.y << " ";
-            cout << endl;
-            p = all_prevs[i][p];
-        }
+        // int x = 0;
+        // int y = 0;
+        // for (auto& l: links) {
+        //     x += l.x;
+        //     y += l.y;
+        // }
+        // cout << x << " " << y << " ";
+
+        for(auto rr: links)
+            cout << rr.x << " " << rr.y << " ";
+        cout << endl;
+        p = all_prevs[i][p];
     }
 
     return 0;
