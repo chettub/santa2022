@@ -553,6 +553,6 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
         }
     }
 
-    ll cost = ll(GainConstraint * double(Magnification * Nviolation));
+    ll cost = ll(GainConstraint * (long double)(Magnification * Nviolation) + 0.5);
     return cost;
 }
