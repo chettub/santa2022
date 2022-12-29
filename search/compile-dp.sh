@@ -1,0 +1,1 @@
+g++ check-dp.cpp -o check-dp.out -O3 -std=c++17
