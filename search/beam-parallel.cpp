@@ -117,21 +117,22 @@ lint get_links_hash(vector<Link> const& links) {
 
 vector<Link> get_links(lint hash) {
     vector<Link> links;
-    links.push_back(Link(64, hash % (1LL << 9LL)));
+    links.reserve(8);
+    links.emplace_back(Link(64, hash % (1LL << 9LL)));
     hash >>= 9LL;
-    links.push_back(Link(32, hash % (1LL << 8LL)));
+    links.emplace_back(Link(32, hash % (1LL << 8LL)));
     hash >>= 8LL;
-    links.push_back(Link(16, hash % (1LL << 7LL)));
+    links.emplace_back(Link(16, hash % (1LL << 7LL)));
     hash >>= 7LL;
-    links.push_back(Link(8, hash % (1LL << 6LL)));
+    links.emplace_back(Link(8, hash % (1LL << 6LL)));
     hash >>= 6LL;
-    links.push_back(Link(4, hash % (1LL << 5LL)));
+    links.emplace_back(Link(4, hash % (1LL << 5LL)));
     hash >>= 5LL;
-    links.push_back(Link(2, hash % (1LL << 4LL)));
+    links.emplace_back(Link(2, hash % (1LL << 4LL)));
     hash >>= 4LL;
-    links.push_back(Link(1, hash % (1LL << 3LL)));
+    links.emplace_back(Link(1, hash % (1LL << 3LL)));
     hash >>= 3LL;
-    links.push_back(Link(1, hash % (1LL << 3LL)));
+    links.emplace_back(Link(1, hash % (1LL << 3LL)));
 
     return links;
 }
@@ -145,13 +146,13 @@ int corners(vector<Link>& links) {
 }
 
 // for hash
-vector<vector<int>> get_config(vector<Link>& links) {
-    vector<vector<int>> configs;
-    for (auto& l : links) {
-        configs.push_back({l.x, l.y});
-    }
-    return configs;
-}
+// vector<vector<int>> get_config(vector<Link>& links) {
+//     vector<vector<int>> configs;
+//     for (auto& l : links) {
+//         configs.emplace_back({l.x, l.y});
+//     }
+//     return configs;
+// }
 
 void recursive_comb(int* indexes, int s, int rest, std::function<void(int*)> f) {
     if (rest == 0)
@@ -190,9 +191,9 @@ int main(int argc, char* argv[]) {
             foreach_comb(i, j, [&](int* indexes) {
                 vector<int> comb;
                 for (int k = 0; k < j; ++k) {
-                    comb.push_back(indexes[k]);
+                    comb.emplace_back(indexes[k]);
                 }
-                combs[i][j].push_back(comb);
+                combs[i][j].emplace_back(comb);
             });
             random_shuffle(combs[i][j].begin(), combs[i][j].end());
         }
@@ -202,14 +203,14 @@ int main(int argc, char* argv[]) {
     ios::sync_with_stdio(false);
 
     vector<Link> links;
-    links.push_back(Link(64));
-    links.push_back(Link(32));
-    links.push_back(Link(16));
-    links.push_back(Link(8));
-    links.push_back(Link(4));
-    links.push_back(Link(2));
-    links.push_back(Link(1));
-    links.push_back(Link(1));
+    links.emplace_back(Link(64));
+    links.emplace_back(Link(32));
+    links.emplace_back(Link(16));
+    links.emplace_back(Link(8));
+    links.emplace_back(Link(4));
+    links.emplace_back(Link(2));
+    links.emplace_back(Link(1));
+    links.emplace_back(Link(1));
 
     int n;  // length of path
     cin >> n;
@@ -231,23 +232,23 @@ int main(int argc, char* argv[]) {
 
     vector<Link> links64;
     for (int i = 0; i < 64 * 8; i++) {
-        links64.push_back(Link(64, i));
+        links64.emplace_back(Link(64, i));
     }
     vector<Link> links32;
     for (int i = 0; i < 32 * 8; i++) {
-        links32.push_back(Link(32, i));
+        links32.emplace_back(Link(32, i));
     }
     vector<Link> links16;
     for (int i = 0; i < 16 * 8; i++) {
-        links16.push_back(Link(16, i));
+        links16.emplace_back(Link(16, i));
     }
     vector<Link> links8;
     for (int i = 0; i < 8 * 8; i++) {
-        links8.push_back(Link(8, i));
+        links8.emplace_back(Link(8, i));
     }
     vector<Link> links4;
     for (int i = 0; i < 4 * 8; i++) {
-        links4.push_back(Link(4, i));
+        links4.emplace_back(Link(4, i));
     }
     vector<vector<vector<bool>>> ok6432(n, vector<vector<bool>>(64 * 8, vector<bool>(32 * 8, false)));
     for (int i = 0; i < n; i++) {
@@ -400,7 +401,7 @@ int main(int argc, char* argv[]) {
                         vector<int> xs;
                         for (int k : xuse) {
                             if (c[k].can_move(xmove))
-                                xs.push_back(k);
+                                xs.emplace_back(k);
                         }
                         if ((int)xs.size() < absdx)
                             continue;
@@ -421,7 +422,7 @@ int main(int argc, char* argv[]) {
                                             }
                                         }
                                         if (ok)
-                                            ys.push_back(k);
+                                            ys.emplace_back(k);
                                     }
                                 }
                                 if ((int)ys.size() >= absdy) {
@@ -434,7 +435,7 @@ int main(int argc, char* argv[]) {
                                         if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                             auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                             if (flag)
-                                                states_nxt.push_back({c, idx});
+                                                states_nxt.emplace_back(c, idx);
                                         }
                                         // revert y moves
                                         for (int k = 0; k < absdy; ++k) {
@@ -448,7 +449,7 @@ int main(int argc, char* argv[]) {
                                 if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                     auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                     if (flag)
-                                        states_nxt.push_back({c, idx});
+                                        states_nxt.emplace_back(c, idx);
                                 }
                             }
                             // revert x moves
@@ -460,7 +461,7 @@ int main(int argc, char* argv[]) {
                         vector<int> ys;
                         for (int k : yuse) {
                             if (c[k].can_move(ymove))
-                                ys.push_back(k);
+                                ys.emplace_back(k);
                         }
                         if ((int)ys.size() >= absdy) {
                             for (auto const& indexesy : combs[ys.size()][absdy]) {
@@ -472,7 +473,7 @@ int main(int argc, char* argv[]) {
                                 if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                     auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                     if (flag)
-                                        states_nxt.push_back({c, idx});
+                                        states_nxt.emplace_back(c, idx);
                                 }
                                 for (int k = 0; k < absdy; ++k) {
                                     c[ys[indexesy[k]]].move(yrev);
@@ -492,12 +493,12 @@ int main(int argc, char* argv[]) {
                         auto cc_hash = get_links_hash(p.first);
                         auto [it, flag] = counts_nxt_main_hash.insert(cc_hash);
                         if (flag)
-                            states_nxt_main.push_back(p);
+                            states_nxt_main.emplace_back(p);
                     }
                 }
             },
                 ith);
-            threads.push_back(move(th));
+            threads.emplace_back(move(th));
         }
         for (auto& th : threads) {
             th.join();
@@ -521,13 +522,14 @@ int main(int argc, char* argv[]) {
                 all_states.pop_back();
             }
             for (auto& p : all_states.back()) {
-                states.push_back({get_links(p.first), p.second});
+                states.emplace_back(get_links(p.first), p.second);
             }
             i -= restart_use;
             continue;
         }
 
         vector<pair<int, pair<vector<Link>, int>>> states_nxt_sort;
+        states_nxt_sort.reserve(states_nxt_main.size());
         for (int z = 0; z < states_nxt_main.size(); ++z) {
             states_nxt_sort.emplace_back(-corners(states_nxt_main[z].first), states_nxt_main[z]);
         }
@@ -536,16 +538,17 @@ int main(int argc, char* argv[]) {
         });
         states_nxt_main.clear();
         for (int z = 0; z < min(maxi * mult, (int)states_nxt_sort.size()); ++z) {
-            states_nxt_main.push_back(states_nxt_sort[z].second);
+            states_nxt_main.emplace_back(states_nxt_sort[z].second);
         }
 
         random_shuffle(states_nxt_main.begin(), states_nxt_main.end());
 
         vector<pair<lint, int>> states_hist;
+        states_hist.reserve(states_nxt_main.size());
         for (auto& st : states_nxt_main) {
             states_hist.emplace_back(get_links_hash(st.first), st.second);
         }
-        all_states.push_back(states_hist);
+        all_states.emplace_back(states_hist);
         swap(states, states_nxt_main);
         states_nxt_main.clear();
         counts_nxt_main_hash.clear();
