@@ -215,6 +215,8 @@ int main(int argc, char* argv[]) {
     int n;  // length of path
     cin >> n;
 
+    // n = 500;  // for small test
+
     // initial config
     for (size_t i = 0; i < 8; i++) {
         cin >> links[i].x >> links[i].y;
@@ -554,25 +556,46 @@ int main(int argc, char* argv[]) {
         counts_nxt_main_hash.clear();
     }
 
-    cerr << gettime() << ": completed!" << endl;
+    cerr << gettime() << ": search completed!" << endl;
+    vector<vector<Link>> results(n);
     int p = 0;
     for (int i = n - 1; i >= 0; --i) {
         lint state_hash = all_states[i][p].first;
-        vector<Link> links = get_links(state_hash);
+        results[i] = get_links(state_hash);
 
-        // int x = 0;
-        // int y = 0;
-        // for (auto& l: links) {
-        //     x += l.x;
-        //     y += l.y;
-        // }
-        // cout << x << " " << y << " ";
-
-        for (auto rr : links)
+        for (auto rr : results[i])
             cout << rr.x << " " << rr.y << " ";
         cout << endl;
         p = all_states[i][p].second;
     }
 
+    cerr << gettime() << ": verifying result..." << endl;
+    vector<int> arm_length = {64, 32, 16, 8, 4, 2, 1, 1};
+    for (int i = 0; i < n; ++i) {
+        int x = 0;
+        int y = 0;
+        for (int j = 0; j < 8; ++j) {
+            x += results[i][j].x;
+            y += results[i][j].y;
+        }
+        if (x != pos_list[i][0] || y != pos_list[i][1]) {
+            cerr << "result position unmatch at step " << i << endl;
+        }
+    }
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            int len = max(abs(results[i][j].x), abs(results[i][j].y));
+            if (len != arm_length[j])
+                cerr << "config arm length mismatch at step " << i << endl;
+        }
+    }
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < 8; ++j) {
+            int move = abs(results[i][j].x - results[i + 1][j].x) + abs(results[i][j].y - results[i + 1][j].y);
+            if (move > 1)
+                cerr << "config arm " << j << " moves too much at step " << i << endl;
+        }
+    }
+    cerr << gettime() << ": completed." << endl;
     return 0;
 }
