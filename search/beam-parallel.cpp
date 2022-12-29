@@ -375,12 +375,12 @@ int main(int argc, char* argv[]) {
 
         vector<thread> threads;
         for (int ith = 0; ith < n_thread; ++ith) {
-            thread th([&](int i) {
+            thread th([&](int ii) {
                 vector<pair<vector<Link>, int>> states_nxt;
                 // set<vector<vector<int>>> counts_nxt;
                 unordered_set<lint> counts_nxt_hash;
 
-                for (int idx = job_idx[i]; idx < job_idx[i + 1]; ++idx) {
+                for (int idx = job_idx[ii]; idx < job_idx[ii + 1]; ++idx) {
                     vector<Link> c = states[idx].first;
 
                     // sanity check for debugging
