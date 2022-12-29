@@ -252,6 +252,10 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < 4 * 8; i++) {
         links4.emplace_back(Link(4, i));
     }
+
+    // for testing infeasible route
+    // reverse(pos_list.begin(), pos_list.end());
+
     vector<vector<vector<bool>>> ok6432(n, vector<vector<bool>>(64 * 8, vector<bool>(32 * 8, false)));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
@@ -291,12 +295,9 @@ int main(int argc, char* argv[]) {
                         Link& l32nxt = links32[knxt];
                         int ddxarm = l64nxt.x + l32nxt.x - l64now.x - l32now.x;
                         int ddyarm = l64nxt.y + l32nxt.y - l64now.y - l32now.y;
-
                         int cntmove = abs(dj) + abs(dk);
-
                         if (cntmove + abs(ddxpos - ddxarm) + abs(ddypos - ddyarm) == abs(ddxpos) + abs(ddypos))
                             flag = true;
-
                         if (flag)
                             break;
                     }
@@ -305,6 +306,23 @@ int main(int argc, char* argv[]) {
                 }
                 ok6432[i][jnow][know] = flag;
             }
+        }
+
+        bool check_possible = false;
+        for (int jnow = 0; jnow < 64 * 8; jnow++) {
+            for (int know = 0; know < 32 * 8; know++) {
+                if (ok6432[i][jnow][know]) {
+                    check_possible = true;
+                    break;
+                }
+            }
+            if (check_possible)
+                break;
+        }
+        if (!check_possible) {
+            cerr << "cannot move arm 64,32 from " << i + 1 << " to " << i << endl;
+            cerr << "coordinates : (" << posnxt[0] << "," << posnxt[1] << ") -> (" << posnow[0] << "," << posnow[1] << ")" << endl;
+            return 0;
         }
     }
 
