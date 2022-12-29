@@ -266,9 +266,44 @@ int main(int argc, char* argv[]) {
         }
     }
     for (int i = n - 2; i >= 0; i--) {
-        for (int j = 0; j < 64 * 8; j++) {
-            for (int k = 0; k < 32 * 8; k++) {
-                ok6432[i][j][k] = ok6432[i][j][k] && (ok6432[i + 1][j][k] || ok6432[i + 1][(j + 1) % (64 * 8)][k] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][k] || ok6432[i + 1][j][(k + 1) % (32 * 8)] || ok6432[i + 1][(j + 1) % (64 * 8)][(k + 1) % (32 * 8)] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 1) % (32 * 8)] || ok6432[i + 1][j][(k + 32 * 8 - 1) % (32 * 8)] || ok6432[i + 1][(j + 1) % (64 * 8)][(k + 32 * 8 - 1) % (32 * 8)] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 32 * 8 - 1) % (32 * 8)]);
+        auto posnow = pos_list[i];
+        auto posnxt = pos_list[i + 1];
+        int ddxpos = posnxt[0] - posnow[0];
+        int ddypos = posnxt[1] - posnow[1];
+        for (int jnow = 0; jnow < 64 * 8; jnow++) {
+            for (int know = 0; know < 32 * 8; know++) {
+                // int j = jnow;
+                // int k = know;
+                // ok6432[i][j][k] = ok6432[i][j][k] && (ok6432[i + 1][j][k] || ok6432[i + 1][(j + 1) % (64 * 8)][k] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][k] || ok6432[i + 1][j][(k + 1) % (32 * 8)] || ok6432[i + 1][(j + 1) % (64 * 8)][(k + 1) % (32 * 8)] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 1) % (32 * 8)] || ok6432[i + 1][j][(k + 32 * 8 - 1) % (32 * 8)] || ok6432[i + 1][(j + 1) % (64 * 8)][(k + 32 * 8 - 1) % (32 * 8)] || ok6432[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 32 * 8 - 1) % (32 * 8)]);
+                // continue;
+                if (!ok6432[i][jnow][know])
+                    continue;
+                bool flag = false;
+                Link& l64now = links64[jnow];
+                Link& l32now = links32[know];
+                for (int dj = -1; dj <= 1; dj++) {
+                    for (int dk = -1; dk <= 1; dk++) {
+                        int jnxt = (jnow + dj + 64 * 8) % (64 * 8);
+                        int knxt = (know + dk + 32 * 8) % (32 * 8);
+                        if (!ok6432[i + 1][jnxt][knxt])
+                            continue;
+                        Link& l64nxt = links64[jnxt];
+                        Link& l32nxt = links32[knxt];
+                        int ddxarm = l64nxt.x + l32nxt.x - l64now.x - l32now.x;
+                        int ddyarm = l64nxt.y + l32nxt.y - l64now.y - l32now.y;
+
+                        int cntmove = abs(dj) + abs(dk);
+
+                        if (cntmove + abs(ddxpos - ddxarm) + abs(ddypos - ddyarm) == abs(ddxpos) + abs(ddypos))
+                            flag = true;
+
+                        if (flag)
+                            break;
+                    }
+                    if (flag)
+                        break;
+                }
+                ok6432[i][jnow][know] = flag;
             }
         }
     }
@@ -338,7 +373,7 @@ int main(int argc, char* argv[]) {
     all_states.push_back({make_pair<lint, int>(get_links_hash(states[0].first), -1)});
 
     // initial beam search parameters ----------------------------------------
-    int maxi = 10000;   // beam width, how many states to keep
+    int maxi = 500;     // beam width, how many states to keep
     int mult = 2;       // beam width multiplier, increase beam width by this when failed
     int restart = 256;  // restart steps, go back to previous steps when failed
     int max_depth = 6;  // maximum restart depth. stop increasing beam width here
