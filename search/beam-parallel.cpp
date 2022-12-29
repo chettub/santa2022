@@ -273,22 +273,29 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    vector<vector<bool>> ok16(n, vector<bool>(16 * 8, false));
+    cerr << gettime() << ": compute possible 64+16 positions by DP" << endl;
+
+    vector<vector<vector<bool>>> ok6416(n, vector<vector<bool>>(64 * 8, vector<bool>(16 * 8, false)));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
-        for (int j = 0; j < 16 * 8; j++) {
-            // cerr << j << " " << links16[j].x << " " << links16[j].y << endl;
-            int dx = pos[0] - links16[j].x;
-            int dy = pos[1] - links16[j].y;
-            if (abs(dx) <= 128 - 16 && abs(dy) <= 128 - 16)
-                ok16[i][j] = true;
+        for (int j = 0; j < 64 * 8; j++) {
+            for (int k = 0; k < 16 * 8; ++k) {
+                // cerr << j << " " << links64[j].x << " " << links64[j].y << endl;
+                int dx = pos[0] - links64[j].x - links16[k].x;
+                int dy = pos[1] - links64[j].y - links16[k].y;
+                if (16 <= max(abs(dx), abs(dy)) && max(abs(dx), abs(dy)) <= 48)
+                    ok6416[i][j][k] = true;
+            }
         }
     }
     for (int i = n - 2; i >= 0; i--) {
-        for (int j = 0; j < 16 * 8; j++) {
-            ok16[i][j] = ok16[i][j] && (ok16[i + 1][j] || ok16[i + 1][(j + 1) % (16 * 8)] || ok16[i + 1][(j + 16 * 8 - 1) % (16 * 8)]);
+        for (int j = 0; j < 64 * 8; j++) {
+            for (int k = 0; k < 16 * 8; k++) {
+                ok6416[i][j][k] = ok6416[i][j][k] && (ok6416[i + 1][j][k] || ok6416[i + 1][(j + 1) % (64 * 8)][k] || ok6416[i + 1][(j + 64 * 8 - 1) % (64 * 8)][k] || ok6416[i + 1][j][(k + 1) % (16 * 8)] || ok6416[i + 1][(j + 1) % (64 * 8)][(k + 1) % (16 * 8)] || ok6416[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 1) % (16 * 8)] || ok6416[i + 1][j][(k + 16 * 8 - 1) % (16 * 8)] || ok6416[i + 1][(j + 1) % (64 * 8)][(k + 16 * 8 - 1) % (16 * 8)] || ok6416[i + 1][(j + 64 * 8 - 1) % (64 * 8)][(k + 16 * 8 - 1) % (16 * 8)]);
+            }
         }
     }
+
     vector<vector<bool>> ok8(n, vector<bool>(8 * 8, false));
     for (int i = 0; i < n; i++) {
         auto pos = pos_list[i];
@@ -334,7 +341,7 @@ int main(int argc, char* argv[]) {
     int maxi = 10000;   // beam width, how many states to keep
     int mult = 2;       // beam width multiplier, increase beam width by this when failed
     int restart = 256;  // restart steps, go back to previous steps when failed
-    int max_depth = 5;  // maximum restart depth. stop increasing beam width here
+    int max_depth = 6;  // maximum restart depth. stop increasing beam width here
     int depth = 0;      // current restart depth. there're maximum depth
     // initial beam search parameters ----------------------------------------
 
@@ -434,7 +441,7 @@ int main(int argc, char* argv[]) {
                                         }
                                         // auto cc = get_config(c);
                                         auto cc_hash = get_links_hash(c);
-                                        if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                        if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok6416[i + 1][c[0].get_hash()][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                             auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                             if (flag)
                                                 states_nxt.emplace_back(c, idx);
@@ -448,7 +455,7 @@ int main(int argc, char* argv[]) {
                             } else {
                                 // auto cc = get_config(c);
                                 auto cc_hash = get_links_hash(c);
-                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok6416[i + 1][c[0].get_hash()][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                     auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                     if (flag)
                                         states_nxt.emplace_back(c, idx);
@@ -472,7 +479,7 @@ int main(int argc, char* argv[]) {
                                 }
                                 // auto cc = get_config(c);
                                 auto cc_hash = get_links_hash(c);
-                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok6416[i + 1][c[0].get_hash()][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
                                     auto [it, flag] = counts_nxt_hash.insert(cc_hash);
                                     if (flag)
                                         states_nxt.emplace_back(c, idx);
