@@ -431,9 +431,10 @@ int main(int argc, char* argv[]) {
                                         }
                                         // auto cc = get_config(c);
                                         auto cc_hash = get_links_hash(c);
-                                        if (counts_nxt_hash.count(cc_hash) == 0 && ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
-                                            states_nxt.push_back({c, idx});
-                                            counts_nxt_hash.insert(cc_hash);
+                                        if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                            auto [it, flag] = counts_nxt_hash.insert(cc_hash);
+                                            if (flag)
+                                                states_nxt.push_back({c, idx});
                                         }
                                         // revert y moves
                                         for (int k = 0; k < absdy; ++k) {
@@ -444,9 +445,10 @@ int main(int argc, char* argv[]) {
                             } else {
                                 // auto cc = get_config(c);
                                 auto cc_hash = get_links_hash(c);
-                                if (counts_nxt_hash.count(cc_hash) == 0 && ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
-                                    states_nxt.push_back({c, idx});
-                                    counts_nxt_hash.insert(cc_hash);
+                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                    auto [it, flag] = counts_nxt_hash.insert(cc_hash);
+                                    if (flag)
+                                        states_nxt.push_back({c, idx});
                                 }
                             }
                             // revert x moves
@@ -467,9 +469,10 @@ int main(int argc, char* argv[]) {
                                 }
                                 // auto cc = get_config(c);
                                 auto cc_hash = get_links_hash(c);
-                                if (counts_nxt_hash.count(cc_hash) == 0 && ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
-                                    states_nxt.push_back({c, idx});
-                                    counts_nxt_hash.insert(cc_hash);
+                                if (ok6432[i + 1][c[0].get_hash()][c[1].get_hash()] && ok16[i + 1][c[2].get_hash()] && ok8[i + 1][c[3].get_hash()] && ok4[i + 1][c[4].get_hash()]) {
+                                    auto [it, flag] = counts_nxt_hash.insert(cc_hash);
+                                    if (flag)
+                                        states_nxt.push_back({c, idx});
                                 }
                                 for (int k = 0; k < absdy; ++k) {
                                     c[ys[indexesy[k]]].move(yrev);
@@ -487,10 +490,9 @@ int main(int argc, char* argv[]) {
                     for (auto& p : states_nxt) {
                         // auto cc = get_config(p.first);
                         auto cc_hash = get_links_hash(p.first);
-                        if (counts_nxt_main_hash.count(cc_hash) == 0) {
-                            counts_nxt_main_hash.insert(cc_hash);
+                        auto [it, flag] = counts_nxt_main_hash.insert(cc_hash);
+                        if (flag)
                             states_nxt_main.push_back(p);
-                        }
                     }
                 }
             },
