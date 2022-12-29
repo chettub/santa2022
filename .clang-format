@@ -1,0 +1,28 @@
+BasedOnStyle: LLVM
+Standard: Cpp11
+
+ColumnLimit: 0
+IndentWidth: 4
+UseTab: Never
+MaxEmptyLinesToKeep: 2
+
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: Attach
+AlignAfterOpenBracket: false
+SpaceBeforeParens: ControlStatements
+AlwaysBreakTemplateDeclarations: true
+AlignEscapedNewlinesLeft: true
+PointerAlignment: Left
+AccessModifierOffset: -4
+AllowShortFunctionsOnASingleLine: All
+AllowShortBlocksOnASingleLine: true
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: false
+  AfterControlStatement: false
+  SplitEmptyFunction: false
+
+SpacesBeforeTrailingComments: 2
+CommentPragmas: '[!\*]'
