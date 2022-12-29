@@ -324,7 +324,7 @@ int main(int argc, char* argv[]) {
     vector<pair<vector<Link>, int>> states, states_nxt_main;
     states.push_back({links, -1});
     // set<vector<vector<int>>> counts_nxt_main;
-    set<lint> counts_nxt_main_hash;
+    unordered_set<lint> counts_nxt_main_hash;
     all_states.push_back({make_pair<lint, int>(get_links_hash(states[0].first), -1)});
 
     // initial beam search parameters ----------------------------------------
@@ -377,7 +377,7 @@ int main(int argc, char* argv[]) {
             thread th([&](int i) {
                 vector<pair<vector<Link>, int>> states_nxt;
                 // set<vector<vector<int>>> counts_nxt;
-                set<lint> counts_nxt_hash;
+                unordered_set<lint> counts_nxt_hash;
 
                 for (int idx = job_idx[i]; idx < job_idx[i + 1]; ++idx) {
                     vector<Link> c = states[idx].first;
