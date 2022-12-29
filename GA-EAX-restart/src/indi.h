@@ -13,8 +13,10 @@ public:
     TIndi();
     ~TIndi();
     void define(ll N);
-    TIndi& operator=(const TIndi& src);  /* Copy */
-    bool operator==(const TIndi& indi2); /* Return true if two tours are the same, false otherwise */
+    TIndi& operator=(const TIndi& src);          /* Copy */
+    bool operator==(const TIndi& indi2);         /* Return true if two tours are the same, false otherwise */
+    ll next(const ll cur, const ll bef) const;   /* next vertex*/
+    bool has_edge(const ll u, const ll v) const; /* check is has edge u-v */
 
     ll fN;               /* Number of cities */
     ll** fLink;          /* fLink[i][]: two vertices adjacent to i */

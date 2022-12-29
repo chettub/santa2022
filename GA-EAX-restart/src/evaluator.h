@@ -18,6 +18,9 @@ int encodesmall(int x, int y);
 pair<int, int> decodesmall(int i);
 bool checkin(int x, int y);
 
+int quadrant(int idx);
+int quadrant(int x, int y);
+
 class TEvaluator {
 public:
     TEvaluator();

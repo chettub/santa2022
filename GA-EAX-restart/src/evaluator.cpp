@@ -26,6 +26,24 @@ bool checkin(int x, int y) {
     return x == clamp(x, 0, 256) && y == clamp(y, 0, 256);
 }
 
+int quadrant(int idx) {
+    auto [x, y] = decode(idx);
+    return quadrant(x, y);
+}
+int quadrant(int x, int y) {
+    if (x > 128 && y > 128)
+        return 1;
+    else if (x < 128 && y > 128)
+        return 2;
+    else if (x < 128 && y < 128)
+        return 3;
+    else if (x > 128 && y < 128)
+        return 4;
+    else
+        return 0;
+}
+
+
 TEvaluator::TEvaluator() {
     fEdgeDis = NULL;
     fNearCity = NULL;
@@ -476,6 +494,63 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
                 break;
         }
         Nviolation += violation;
+    }
+
+    // slowing down speed of 4st -> 3rd -> 2nd -> 1st quadrant tour
+    {
+        for (int _ = 0; _ < 2; _++) {
+            int xnow, xbef, ynow, ybef;
+            int now, bef;
+            if (_ == 0) {
+                xnow = 128;
+                xbef = 128 + 1;
+                ynow = 128 - 4;
+                ybef = 128 - 4;
+            } else if (_ == 1) {
+                xnow = 128;
+                xbef = 128 + 1;
+                ynow = 128 - 5;
+                ybef = 128 - 5;
+            } else
+                assert(false);
+            now = encode(xnow, ynow);
+            bef = encode(xbef, ybef);
+
+            if (!indi.has_edge(now, bef))
+                continue;
+
+            bool violation = false;
+
+            int cntyplus = 0;
+            vector<bool> isinquadrant(5, false);
+
+            for (int __ = 0; __ < 2000; __++) {
+                int nxt = indi.next(now, bef);
+                bef = now;
+                now = nxt;
+
+                auto [xnow, ynow] = decode(now);
+                auto [xbef, ybef] = decode(bef);
+
+                int nowquad = quadrant(now);
+                isinquadrant[nowquad] = true;
+
+                if (isinquadrant[4])
+                    break;
+                if (isinquadrant[1]) {
+                    if (isinquadrant[2] || isinquadrant[3]) {
+                        violation = true;
+                    }
+                    break;
+                }
+
+                cntyplus += ynow > ybef;
+                if (cntyplus >= 128)
+                    break;
+            }
+
+            Nviolation += violation;
+        }
     }
 
     ll cost = ll(GainConstraint * double(Magnification * Nviolation));

@@ -32,6 +32,14 @@ TIndi& TIndi::operator=(const TIndi& src) {
     return *this;
 }
 
+ll TIndi::next(const ll cur, const ll bef) const {
+    return fLink[cur][0] + fLink[cur][1] - bef;
+}
+
+bool TIndi::has_edge(const ll u, const ll v) const {
+    return (fLink[u][0] == v) || (fLink[u][1] == v);
+}
+
 bool TIndi::operator==(const TIndi& src) {
     ll curr, next, pre, flag_identify;
 
