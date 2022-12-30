@@ -52,6 +52,8 @@ public:
     void writeBest();                 /* Write the best tour */
     void writeAll(const string path); /* Write all tours */
 
+    void readPop(const string path); /* read population */
+
     TEvaluator* fEvaluator; /* Distance of the edges */
     TCross** tCross;        /* Eede assembly crossover */
     TKopt** tKopt;          /* Local search with the 2-opt neighborhood */
@@ -87,6 +89,10 @@ public:
 
     vector<bool> kaizen;
     double GainConstraint;
+    string initial_route_path;
+    int Npopnow; /* Number of population members now */
+    int initial_stage;
+    int Nrun;
 };
 
 #endif

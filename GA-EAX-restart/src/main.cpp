@@ -74,8 +74,8 @@ signed main(int argc, char* argv[]) {
 
     // ./GA-EAX-restart tsp_file NPOP NCH optimum tmax
     // default: 100, 30, -1(unknown optimum), 3600
-    if (argc != 8 && argc != 9) {
-        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax seed Nthread [gain_constraint]\n";
+    if (!(9 <= argc && argc <= 11)) {
+        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax seed Nthread gain_constraint [initial_route_file] [starting_stage]\n";
         exit(-1);
     }
     gEnv->fFileNameTSP = argv[1];
@@ -86,15 +86,19 @@ signed main(int argc, char* argv[]) {
     InitURandom(atoi(argv[6]));
     gEnv->terminate = false;
     gEnv->Nthread = atoi(argv[7]);
-    if (argc >= 9)
-        gEnv->GainConstraint = atof(argv[8]);
+    gEnv->GainConstraint = atof(argv[8]);
+    if (argc >= 10)
+        gEnv->initial_route_path = argv[9];
+    if (argc >= 11)
+        gEnv->initial_stage = atoi(argv[10]);
     else
-        gEnv->GainConstraint = 0.0;
+        gEnv->initial_stage = 1;
 
     cout << "Initialization ..." << endl;
     gEnv->define();
     for (ll n = 0; n < 1000000; ++n) {
         printf("Run %lld\n", n);
+        gEnv->Nrun = n;
         gEnv->doIt();
         if (gEnv->terminate)
             break;

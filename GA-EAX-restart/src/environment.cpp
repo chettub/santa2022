@@ -10,6 +10,8 @@
 #include "environment.h"
 #endif
 
+#include "util.h"
+
 std::mutex mtx;
 
 using ll = long long;
@@ -80,6 +82,9 @@ void TEnvironment::define() {
 }
 
 void TEnvironment::doIt() {
+    Npopnow = 0;
+    if (initial_route_path != "")
+        readPop(initial_route_path);
     this->initPop();
     this->init();
     this->getEdgeFreq();
@@ -116,12 +121,12 @@ void TEnvironment::doIt() {
 
         int stagepre = fStage;
         if (this->terminationCondition()) {
-            this->writeAll("StageII_" + to_string(duration) + ".txt");
+            this->writeAll("Run_" + to_string(Nrun) + "_StageII_" + to_string(duration) + ".txt");
             break;
         }
         int stagecurr = fStage;
         if (stagepre != stagecurr)
-            this->writeAll("StageI_" + to_string(duration) + ".txt");
+            this->writeAll("Run_" + to_string(Nrun) + "_StageI_" + to_string(duration) + ".txt");
 
         this->selectForMating();
 
@@ -226,7 +231,10 @@ void TEnvironment::init() {
     fCurNumOfGen = 0;
     fStagBest = 0;
     fMaxStagBest = 0;
-    fStage = 1;    /* Stage I */
+    // fStage = 1;    /* Stage I */
+    fStage = initial_stage;
+    cout << "starting from stage " << fStage << endl;
+    fCurNumOfGen1 = 0;
     fFlagC[0] = 4; /* Diversity preservation: 1:Greedy, 2:--- , 3:Distance, 4:Entropy (see Section 4) */
     fFlagC[1] = 1; /* Eset Type: 1:Single-AB, 2:Block2 (see Section 3) */
 }
@@ -319,11 +327,15 @@ void TEnvironment::setAverageBest() {
 
 void TEnvironment::initPop() {
     // naive parallel
-    assert(Npop % Nthread == 0);
-    for (ll j_thread = 0; j_thread < Npop / Nthread; j_thread++) {
+    // assert(Npop % Nthread == 0);
+    int dNpop = Npop - Npopnow;
+    int cnt = 0;
+    for (ll j_thread = 0; j_thread < dNpop; j_thread += Nthread) {
         vector<thread> threads;
         for (int i = 0; i < Nthread; i++) {
-            int s = j_thread + i * Npop / Nthread;
+            int s = j_thread + i + Npopnow;
+            if (s >= Npop)
+                continue;
             thread th([&](int s, int i) {
                 tKopt[i]->makeRandSol(tCurPop[s]);                                                   /* Make a random tour */
                 tKopt[i]->doIt(tCurPop[s]);                                                          /* Apply the local search with the 2-opt neighborhood */
@@ -332,10 +344,12 @@ void TEnvironment::initPop() {
                 s, i);
             threads.push_back(move(th));
         }
+        cnt += (int)threads.size();
         for (auto& th : threads)
             th.join();
     }
-
+    Npopnow += cnt;
+    assert(Npop == Npopnow);
 
     // original
     // for (ll i = 0; i < Npop; ++i) {
@@ -420,4 +434,43 @@ void TEnvironment::writeAll(const string path) {
     fclose(fp);
 
     cout << "finished writing" << endl;
+}
+
+void TEnvironment::readPop(const string path) {
+    if (Npopnow == Npop)
+        return;
+    ifstream ifs(path);
+    string str_buf;
+    if (ifs.fail()) {
+        cerr << "failed to open population file " << path << endl;
+        cerr << "ignore population file and continue program" << endl;
+        return;
+    }
+    int cntPop = 0;
+    while (getline(ifs, str_buf)) {
+        if (str_buf == "")
+            break;
+        getline(ifs, str_buf);
+
+        vector<int> route = string_to_vector_int(str_buf, ' ');
+        assert(route.size() == fEvaluator->Ncity);
+        for (int i = 0; i < fEvaluator->Ncity; i++) {
+            int j = (i == fEvaluator->Ncity - 1 ? 0 : i + 1);
+            int u = route[i] - 1;
+            int v = route[j] - 1;
+            tCurPop[Npopnow].fLink[u][0] = v;
+            tCurPop[Npopnow].fLink[v][1] = u;
+        }
+        fEvaluator->doIt(tCurPop[Npopnow]);
+        tCurPop[Npopnow].fEvaluationValue += fEvaluator->funcCostConstraintViolation(tCurPop[Npopnow]);
+
+        cntPop++;
+        Npopnow++;
+        if (Npopnow == Npop)
+            break;
+    }
+
+    cout << "read " << cntPop << " routes from file " << path << endl;
+
+    return;
 }

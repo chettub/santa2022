@@ -94,7 +94,7 @@ void TEvaluator::setInstance(char filename[]) {
     }
 
     if (inputcsv) {
-        Magnification = 1000000ll;
+        Magnification = 10000000000ll;
         INF = 100ll;
         Len = 257;
         Ncity = Len * Len;
@@ -169,7 +169,7 @@ void TEvaluator::setInstance(char filename[]) {
             fNearCity[ci][0] = ci;
             auto [x1, y1] = decode(ci);
             for (j1 = 1; j1 <= fNearNumMax; ++j1) {
-                minDis = 10000000000ll;
+                minDis = 2 * INF * Magnification;
                 // for (j2 = 0; j2 < Ncity; ++j2) {
                 for (int dx = -8; dx <= 8; dx++) {
                     for (int dy = -8; dy <= 8; dy++) {
