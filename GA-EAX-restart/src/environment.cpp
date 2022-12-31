@@ -1,3 +1,4 @@
+#include "unistd.h"
 #include <algorithm>
 #include <iostream>
 #include <math.h>
@@ -133,61 +134,84 @@ void TEnvironment::doIt() {
 
         // high cpu usage parallelization
         // has a bug in it and does not work well
-        // assert(Npop >= Nthread * 2);
-        // vector<thread> threads(Nthread);
-        // vector<bool> flagfinished(Nthread, false);
-        // vector<int> lastindex(Nthread);
-        // for (int i = 0; i < Nthread; i++) {
-        //     int s1 = i;
-        //     int s2 = i + Nthread;
-        //     thread th([&](int s1, int s2, int i) {
-        //         lastindex[i] = s2;
-        //         this->generateKids(s1, s2, i);
-        //         flagfinished[i] = true;
-        //     },
-        //         s1, s2, i);
-        //     threads[i] = move(th);
-        // }
+        assert(Npop >= Nthread * 2 && Npop % Nthread == 0);
+        vector<thread> threads(Nthread);
+        vector<bool> flagfinished(Nthread, false);
+        vector<int> lastindex(Nthread);
+        for (int i = 0; i < Nthread; i++) {
+            int s1 = i;
+            int s2 = i + Nthread;
+            thread th([&](int s1, int s2, int i) {
+                this->generateKids(s1, s2, i);
+                {
+                    lock_guard<mutex> lock(mtx);
+                    lastindex[i] = s2;
+                    flagfinished[i] = true;
+                }
+            },
+                s1, s2, i);
+            threads[i] = move(th);
+        }
         // set<int> sleft;
         // for (int s = Nthread * 2; s < Npop; s++) {
         //     sleft.insert(s);
         // }
-        // for (int _ = 0; _ < Npop - Nthread; _++) {
-        //     bool breakflag = false;
-        //     while (true) {
-        //         for (int i = 0; i < Nthread; i++) {
-        //             if (flagfinished[i] == true && lastindex[i] >= Nthread) {
-        //                 threads[i].join();
-        //                 flagfinished[i] = false;
-        //                 breakflag = true;
+        for (int _ = 0; _ < Npop - Nthread; _++) {
+            bool breakflag = false;
+            while (true) {
+                for (int i = 0; i < Nthread; i++) {
+                    if (flagfinished[i] == true && lastindex[i] >= Nthread) {
+                        threads[i].join();
+                        {
+                            lock_guard<mutex> lock(mtx);
+                            flagfinished[i] = false;
+                        }
+                        breakflag = true;
 
-        //                 int s1 = lastindex[i];
-        //                 int s2;
-        //                 if (sleft.empty())
-        //                     s2 = i;
-        //                 else {
-        //                     s2 = *sleft.begin();
-        //                     sleft.erase(s2);
-        //                 }
-        //                 cout << s1 << " " << s2 << endl;
-        //                 thread th([&](int s1, int s2, int i) {
-        //                     lastindex[i] = s2;
-        //                     this->generateKids(s1, s2, i);
-        //                     flagfinished[i] = true;
-        //                 },
-        //                     s1, s2, i);
-        //                 threads[i] = move(th);
-        //                 break;
-        //             }
-        //         }
-        //         if (breakflag)
-        //             break;
-        //     }
-        // }
-        // for (auto& th : threads)
-        //     th.join();
+                        int s1 = lastindex[i];
+                        int s2;
+                        if (_ >= Npop - Nthread * 2)
+                            s2 = i;
+                        else
+                            s2 = _ + Nthread * 2;
+                        // if (sleft.empty())
+                        //     s2 = i;
+                        // else {
+                        //     s2 = *sleft.begin();
+                        //     sleft.erase(s2);
+                        // }
+                        // {
+                        //     lock_guard<mutex> lock(mtx);
+                        //     for (int j = 0; j < Nthread; j++) {
+                        //         cout << flagfinished[j] << " ";
+                        //     }
+                        //     cout << endl;
+                        // }
+
+                        // cout << i << " " << _ << " " << s1 << " " << s2 << endl;
+                        thread th([&](int s1, int s2, int i) {
+                            this->generateKids(s1, s2, i);
+                            {
+                                lock_guard<mutex> lock(mtx);
+                                lastindex[i] = s2;
+                                flagfinished[i] = true;
+                                // cout << " end " << i << endl;
+                            }
+                        },
+                            s1, s2, i);
+                        threads[i] = move(th);
+                        break;
+                    }
+                }
+                if (breakflag)
+                    break;
+            }
+        }
+        for (auto& th : threads)
+            th.join();
 
         // naive parallel
+        /*
         assert(Npop % Nthread == 0);
         vector<thread> threads;
         for (int i = 0; i < Nthread; i++) {
@@ -219,6 +243,7 @@ void TEnvironment::doIt() {
         }
         for (auto& th : threads)
             th.join();
+        */
 
         ++fCurNumOfGen;
     }
@@ -330,27 +355,27 @@ void TEnvironment::initPop() {
     // naive parallel
     // assert(Npop % Nthread == 0);
     int dNpop = Npop - Npopnow;
-    int cnt = 0;
-    for (ll j_thread = 0; j_thread < dNpop; j_thread += Nthread) {
-        vector<thread> threads;
-        for (int i = 0; i < Nthread; i++) {
-            int s = j_thread + i + Npopnow;
-            if (s >= Npop)
-                continue;
-            thread th([&](int s, int i) {
+    // int cnt = 0;
+    vector<thread> threads;
+    for (int i = 0; i < Nthread; i++) {
+        thread th([&](int i) {
+            for (ll j_thread = 0; j_thread < dNpop; j_thread += Nthread) {
+                int s = j_thread + i + Npopnow;
+                if (s >= Npop)
+                    break;
                 tKopt[i]->makeRandSol(tCurPop[s]);                                                   /* Make a random tour */
                 tKopt[i]->doIt(tCurPop[s]);                                                          /* Apply the local search with the 2-opt neighborhood */
                 tCurPop[s].fEvaluationValue += fEvaluator->funcCostConstraintViolation(tCurPop[s]);  // NEW
-            },
-                s, i);
-            threads.push_back(move(th));
-        }
-        cnt += (int)threads.size();
-        for (auto& th : threads)
-            th.join();
+            } },
+            i);
+
+        threads.push_back(move(th));
+        // cnt += (int)threads.size();
     }
-    Npopnow += cnt;
-    assert(Npop == Npopnow);
+    for (auto& th : threads)
+        th.join();
+    // Npopnow += cnt;
+    // assert(Npop == Npopnow);
 
     // original
     // for (ll i = 0; i < Npop; ++i) {
@@ -379,6 +404,29 @@ void TEnvironment::generateKids(ll s, int i) {
     kaizen[fIndexForMating[s]] = costnew < costbef;
     fAccumurateNumCh += tCross[i]->fNumOfGeneratedCh;
 }
+
+void TEnvironment::generateKids(ll s1, ll s2, int i) {
+    // cout << " begin " << i << endl;
+    /* Note: tCurPop[fIndexForMating[s]] is replaced with a best offspring solutions in tCorss->DoIt().
+     fEegeFreq[][] is also updated there. */
+    // update s1
+    ll costbef = tCurPop[fIndexForMating[s1]].fEvaluationValue;
+    tCross[i]->setParents(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], fFlagC, Nch);
+    tCross[i]->doIt(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], Nch, 1, fFlagC, fEdgeFreq);
+    ll costnew = tCurPop[fIndexForMating[s1]].fEvaluationValue;
+    {
+        lock_guard<mutex> lock(mtx);
+        kaizen[fIndexForMating[s1]] = costnew < costbef;
+        fAccumurateNumCh += tCross[i]->fNumOfGeneratedCh;
+    }
+    // ll costbef = tCurPop[fIndexForMating[s]].fEvaluationValue;
+    // tCross[i]->setParents(tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s + 1]], fFlagC, Nch);
+    // tCross[i]->doIt(tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s + 1]], Nch, 1, fFlagC, fEdgeFreq);
+    // ll costnew = tCurPop[fIndexForMating[s]].fEvaluationValue;
+    // kaizen[fIndexForMating[s]] = costnew < costbef;
+    // fAccumurateNumCh += tCross[i]->fNumOfGeneratedCh;
+}
+
 
 void TEnvironment::getEdgeFreq() {
     ll k0, k1, N = fEvaluator->Ncity;

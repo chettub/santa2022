@@ -43,10 +43,11 @@ public:
     bool terminationCondition(); /* Decide whether to proceed to next stage (or treminate the GA) */
     void setAverageBest();       /* Compute average and best tour lengths of the population */
 
-    void initPop();                 /* Create an initial population */
-    void selectForMating();         /* Determine a set of pairs of parents at each generation */
-    void generateKids(ll s, int i); /* Generate offspring solutions from a selected pair of parents. Selection for survival is also performed here. */
-    void getEdgeFreq();             /* Compute the frequency of the edges of the population */
+    void initPop();                         /* Create an initial population */
+    void selectForMating();                 /* Determine a set of pairs of parents at each generation */
+    void generateKids(ll s, int i);         /* Generate offspring solutions from a selected pair of parents. Selection for survival is also performed here. */
+    void generateKids(ll s1, ll s2, int i); /* Generate offspring solutions from a selected pair of parents. Selection for survival is also performed here. */
+    void getEdgeFreq();                     /* Compute the frequency of the edges of the population */
 
     void printOn();                                          /* Display and write summary of results */
     void writeBest();                                        /* Write the best tour */

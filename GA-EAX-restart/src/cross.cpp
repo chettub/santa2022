@@ -2,6 +2,11 @@
 #include "cross.h"
 #endif
 
+#include <mutex>
+
+
+std::mutex mtx_edgefreq;
+
 using ll = long long;
 
 TCross::TCross(ll N) {
@@ -931,10 +936,13 @@ void TCross::incrementEdgeFreq(int** fEdgeFreq) {
             // r2 - r1 remove
             // r2 - b2 add
 
-            ++fEdgeFreq[r1][b1];
-            --fEdgeFreq[r1][r2];
-            --fEdgeFreq[r2][r1];
-            ++fEdgeFreq[r2][b2];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                ++fEdgeFreq[r1][b1];
+                --fEdgeFreq[r1][r2];
+                --fEdgeFreq[r2][r1];
+                ++fEdgeFreq[r2][b2];
+            }
         }
     }
     for (ll s = 0; s < fNumOfBestModiEdge; ++s) {
@@ -943,14 +951,17 @@ void TCross::incrementEdgeFreq(int** fEdgeFreq) {
         a1 = fBestModiEdge[s][2];
         b1 = fBestModiEdge[s][3];
 
-        --fEdgeFreq[aa][bb];
-        --fEdgeFreq[a1][b1];
-        ++fEdgeFreq[aa][a1];
-        ++fEdgeFreq[bb][b1];
-        --fEdgeFreq[bb][aa];
-        --fEdgeFreq[b1][a1];
-        ++fEdgeFreq[a1][aa];
-        ++fEdgeFreq[b1][bb];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            --fEdgeFreq[aa][bb];
+            --fEdgeFreq[a1][b1];
+            ++fEdgeFreq[aa][a1];
+            ++fEdgeFreq[bb][b1];
+            --fEdgeFreq[bb][aa];
+            --fEdgeFreq[b1][a1];
+            ++fEdgeFreq[a1][aa];
+            ++fEdgeFreq[b1][bb];
+        }
     }
 }
 
@@ -986,13 +997,16 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
             DLoss += fEdgeFreq[r2][b2];
             DLoss += fEdgeFreq[b2][r2];
 
-            // Remove
-            --fEdgeFreq[r1][r2];
-            --fEdgeFreq[r2][r1];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                // Remove
+                --fEdgeFreq[r1][r2];
+                --fEdgeFreq[r2][r1];
 
-            // Add
-            ++fEdgeFreq[r2][b2];
-            ++fEdgeFreq[b2][r2];
+                // Add
+                ++fEdgeFreq[r2][b2];
+                ++fEdgeFreq[b2][r2];
+            }
         }
     }
 
@@ -1012,17 +1026,21 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
         DLoss += fEdgeFreq[bb][b1];
         DLoss += fEdgeFreq[b1][bb];
 
-        // Remove
-        --fEdgeFreq[aa][bb];
-        --fEdgeFreq[bb][aa];
-        --fEdgeFreq[a1][b1];
-        --fEdgeFreq[b1][a1];
 
-        // Add
-        ++fEdgeFreq[aa][a1];
-        ++fEdgeFreq[a1][aa];
-        ++fEdgeFreq[bb][b1];
-        ++fEdgeFreq[b1][bb];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            // Remove
+            --fEdgeFreq[aa][bb];
+            --fEdgeFreq[bb][aa];
+            --fEdgeFreq[a1][b1];
+            --fEdgeFreq[b1][a1];
+
+            // Add
+            ++fEdgeFreq[aa][a1];
+            ++fEdgeFreq[a1][aa];
+            ++fEdgeFreq[bb][b1];
+            ++fEdgeFreq[b1][bb];
+        }
     }
 
     for (ll s = 0; s < fNumOfAppliedCycle; ++s) {
@@ -1038,10 +1056,13 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
             b1 = fC[1 + 2 * j];
             b2 = fC[4 + 2 * j];
 
-            ++fEdgeFreq[r1][r2];
-            ++fEdgeFreq[r2][r1];
-            --fEdgeFreq[r2][b2];
-            --fEdgeFreq[b2][r2];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                ++fEdgeFreq[r1][r2];
+                ++fEdgeFreq[r2][r1];
+                --fEdgeFreq[r2][b2];
+                --fEdgeFreq[b2][r2];
+            }
         }
     }
 
@@ -1052,16 +1073,18 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
         a1 = fModiEdge[s][2];
         b1 = fModiEdge[s][3];
 
-        // Remove
-        ++fEdgeFreq[aa][bb];
-        ++fEdgeFreq[bb][aa];
-        ++fEdgeFreq[a1][b1];
-        ++fEdgeFreq[b1][a1];
+        {
+            // Remove
+            ++fEdgeFreq[aa][bb];
+            ++fEdgeFreq[bb][aa];
+            ++fEdgeFreq[a1][b1];
+            ++fEdgeFreq[b1][a1];
 
-        --fEdgeFreq[aa][a1];
-        --fEdgeFreq[a1][aa];
-        --fEdgeFreq[bb][b1];
-        --fEdgeFreq[b1][bb];
+            --fEdgeFreq[aa][a1];
+            --fEdgeFreq[a1][aa];
+            --fEdgeFreq[bb][b1];
+            --fEdgeFreq[b1][bb];
+        }
     }
     return ll(DLoss / 2);
 }
@@ -1100,8 +1123,11 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             if (fEdgeFreq[r1][r2] - 1 != 0)
                 DLoss -= h1 * log(h1);
             DLoss += h2 * log(h2);
-            --fEdgeFreq[r1][r2];
-            --fEdgeFreq[r2][r1];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                --fEdgeFreq[r1][r2];
+                --fEdgeFreq[r2][r1];
+            }
 
             // Add
             h1 = (double)(fEdgeFreq[r2][b2] + 1) / (double)Npop;
@@ -1109,8 +1135,11 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             DLoss -= h1 * log(h1);
             if (fEdgeFreq[r2][b2] != 0)
                 DLoss += h2 * log(h2);
-            ++fEdgeFreq[r2][b2];
-            ++fEdgeFreq[b2][r2];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                ++fEdgeFreq[r2][b2];
+                ++fEdgeFreq[b2][r2];
+            }
         }
     }
 
@@ -1126,32 +1155,44 @@ double TCross::calEntLoss(int** fEdgeFreq) {
         if (fEdgeFreq[aa][bb] - 1 != 0)
             DLoss -= h1 * log(h1);
         DLoss += h2 * log(h2);
-        --fEdgeFreq[aa][bb];
-        --fEdgeFreq[bb][aa];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            --fEdgeFreq[aa][bb];
+            --fEdgeFreq[bb][aa];
+        }
 
         h1 = (double)(fEdgeFreq[a1][b1] - 1) / (double)Npop;
         h2 = (double)(fEdgeFreq[a1][b1]) / (double)Npop;
         if (fEdgeFreq[a1][b1] - 1 != 0)
             DLoss -= h1 * log(h1);
         DLoss += h2 * log(h2);
-        --fEdgeFreq[a1][b1];
-        --fEdgeFreq[b1][a1];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            --fEdgeFreq[a1][b1];
+            --fEdgeFreq[b1][a1];
+        }
 
         h1 = (double)(fEdgeFreq[aa][a1] + 1) / (double)Npop;
         h2 = (double)(fEdgeFreq[aa][a1]) / (double)Npop;
         DLoss -= h1 * log(h1);
         if (fEdgeFreq[aa][a1] != 0)
             DLoss += h2 * log(h2);
-        ++fEdgeFreq[aa][a1];
-        ++fEdgeFreq[a1][aa];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            ++fEdgeFreq[aa][a1];
+            ++fEdgeFreq[a1][aa];
+        }
 
         h1 = (double)(fEdgeFreq[bb][b1] + 1) / (double)Npop;
         h2 = (double)(fEdgeFreq[bb][b1]) / (double)Npop;
         DLoss -= h1 * log(h1);
         if (fEdgeFreq[bb][b1] != 0)
             DLoss += h2 * log(h2);
-        ++fEdgeFreq[bb][b1];
-        ++fEdgeFreq[b1][bb];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            ++fEdgeFreq[bb][b1];
+            ++fEdgeFreq[b1][bb];
+        }
     }
     DLoss = -DLoss;
 
@@ -1170,10 +1211,13 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             b1 = fC[1 + 2 * j];
             b2 = fC[4 + 2 * j];
 
-            ++fEdgeFreq[r1][r2];
-            ++fEdgeFreq[r2][r1];
-            --fEdgeFreq[r2][b2];
-            --fEdgeFreq[b2][r2];
+            {
+                lock_guard<mutex> lock(mtx_edgefreq);
+                ++fEdgeFreq[r1][r2];
+                ++fEdgeFreq[r2][r1];
+                --fEdgeFreq[r2][b2];
+                --fEdgeFreq[b2][r2];
+            }
         }
     }
     for (ll s = 0; s < fNumOfModiEdge; ++s) {
@@ -1182,15 +1226,18 @@ double TCross::calEntLoss(int** fEdgeFreq) {
         a1 = fModiEdge[s][2];
         b1 = fModiEdge[s][3];
 
-        ++fEdgeFreq[aa][bb];
-        ++fEdgeFreq[bb][aa];
-        ++fEdgeFreq[a1][b1];
-        ++fEdgeFreq[b1][a1];
+        {
+            lock_guard<mutex> lock(mtx_edgefreq);
+            ++fEdgeFreq[aa][bb];
+            ++fEdgeFreq[bb][aa];
+            ++fEdgeFreq[a1][b1];
+            ++fEdgeFreq[b1][a1];
 
-        --fEdgeFreq[aa][a1];
-        --fEdgeFreq[a1][aa];
-        --fEdgeFreq[bb][b1];
-        --fEdgeFreq[b1][bb];
+            --fEdgeFreq[aa][a1];
+            --fEdgeFreq[a1][aa];
+            --fEdgeFreq[bb][b1];
+            --fEdgeFreq[b1][bb];
+        }
     }
     return DLoss;
 }
