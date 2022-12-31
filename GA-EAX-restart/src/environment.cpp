@@ -397,7 +397,7 @@ void TEnvironment::getEdgeFreq() {
 void TEnvironment::printOn() {
     printf("Total time: %lld\n", duration);
     printf("bestval = %lld, optimum = %lld \n", gBestValue, this->optimum);
-    fEvaluator->writeToStdout(gBest);
+    // fEvaluator->writeToStdout(gBest);
     if (gBestValue != -1 && gBestValue <= this->optimum)
         printf("Successful\n");
     else
