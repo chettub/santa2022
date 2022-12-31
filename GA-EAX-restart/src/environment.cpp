@@ -424,7 +424,7 @@ void TEnvironment::writeAll(const string path, bool flag_final_route) {
     const char* filename = path.data();
 
     // sort indi by EvaluationValue
-    vector<pair<int, int>> V(Npop);
+    vector<pair<ll, int>> V(Npop);
     for (int i = 0; i < Npop; i++) {
         V[i] = {tCurPop[i].fEvaluationValue, i};
     }
