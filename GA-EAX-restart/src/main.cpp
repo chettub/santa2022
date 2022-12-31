@@ -31,7 +31,7 @@ void signalHandler(int signum) {
     printf("Total time: %lld\n", duration);
     printf("bestval = %lld, optimum = %lld \n", gBestValue, optimum);
 
-    gEnv->writeAll("Interrupted_" + to_string(duration) + ".txt");
+    gEnv->writeAll("Interrupted_" + to_string(duration) + ".txt", 0);
 
     ll Ncity = gBest.fN;
     ll* Array = new ll[Ncity];

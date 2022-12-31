@@ -48,9 +48,9 @@ public:
     void generateKids(ll s, int i); /* Generate offspring solutions from a selected pair of parents. Selection for survival is also performed here. */
     void getEdgeFreq();             /* Compute the frequency of the edges of the population */
 
-    void printOn();                   /* Display and write summary of results */
-    void writeBest();                 /* Write the best tour */
-    void writeAll(const string path); /* Write all tours */
+    void printOn();                                          /* Display and write summary of results */
+    void writeBest();                                        /* Write the best tour */
+    void writeAll(const string path, bool flag_final_route); /* Write all tours */
 
     void readPop(const string path); /* read population */
 

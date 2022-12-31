@@ -113,6 +113,7 @@ void TEnvironment::doIt() {
             duration = difftime(time(nullptr), start_time);
             printf("%lld:\t%lld:\t%lld\t%lf\n", fCurNumOfGen, duration, fBestValue, fAverageValue);
             fflush(stdout);
+            this->writeAll("finalPopulation.txt", 1);
             this->writeBest();
             // record time every 50 gens
             if (duration >= tmax)
@@ -121,12 +122,12 @@ void TEnvironment::doIt() {
 
         int stagepre = fStage;
         if (this->terminationCondition()) {
-            this->writeAll("Run_" + to_string(Nrun) + "_StageII_" + to_string(duration) + ".txt");
+            this->writeAll("Run_" + to_string(Nrun) + "_StageII_" + to_string(duration) + ".txt", 0);
             break;
         }
         int stagecurr = fStage;
         if (stagepre != stagecurr)
-            this->writeAll("Run_" + to_string(Nrun) + "_StageI_" + to_string(duration) + ".txt");
+            this->writeAll("Run_" + to_string(Nrun) + "_StageI_" + to_string(duration) + ".txt", 0);
 
         this->selectForMating();
 
@@ -415,8 +416,9 @@ void TEnvironment::writeBest() {
     fclose(fp);
 }
 
-void TEnvironment::writeAll(const string path) {
-    cout << "writing current population to file : " << path << endl;
+void TEnvironment::writeAll(const string path, bool flag_final_route) {
+    if (!flag_final_route)
+        cout << "writing current population to file : " << path << endl;
 
     FILE* fp;
     const char* filename = path.data();
@@ -428,12 +430,16 @@ void TEnvironment::writeAll(const string path) {
     }
     sort(V.begin(), V.end());
 
-    fp = fopen(filename, "a");
+    if (flag_final_route)
+        fp = fopen(filename, "w");
+    else
+        fp = fopen(filename, "a");
     for (auto& [val, i] : V)
         fEvaluator->writeTo(fp, tCurPop[i]);
     fclose(fp);
 
-    cout << "finished writing" << endl;
+    if (!flag_final_route)
+        cout << "finished writing" << endl;
 }
 
 void TEnvironment::readPop(const string path) {
