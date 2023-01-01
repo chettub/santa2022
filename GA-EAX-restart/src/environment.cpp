@@ -134,7 +134,8 @@ void TEnvironment::doIt() {
 
         // high cpu usage parallelization
         // has a bug in it and does not work well
-        assert(Npop >= Nthread * 2 && Npop % Nthread == 0);
+        // assert(Npop >= Nthread * 2 && Npop % Nthread == 0);
+        assert(Npop >= Nthread * 2);
         vector<thread> threads(Nthread);
         vector<bool> flagfinished(Nthread, false);
         vector<int> lastindex(Nthread);
