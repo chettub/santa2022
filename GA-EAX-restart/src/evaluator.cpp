@@ -353,6 +353,8 @@ void TEvaluator::writeTo(FILE* fp, TIndi& indi) {
     for (ll i = 0; i < indi.fN; ++i)
         fprintf(fp, "%lld ", Array[i]);
     fprintf(fp, "\n");
+
+    delete[] Array;
 }
 
 void TEvaluator::writeToStdout(TIndi& indi) {
