@@ -383,6 +383,7 @@ void TEvaluator::writeToStdout(TIndi& indi) {
     for (ll i = 0; i < indi.fN; ++i)
         printf("%lld ", Array[i]);
     printf("\n");
+    delete[] Array;
 }
 
 bool TEvaluator::checkValid(ll* array, ll value) {
