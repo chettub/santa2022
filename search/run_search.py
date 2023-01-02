@@ -213,9 +213,9 @@ if __name__ == "__main__":
 
         print("Answers found! write submission file...")
         with open(temp_config1) as f:
-            lines = f.readlines()
+            lines_config1 = f.readlines()
         conf1 = []
-        for line in lines:
+        for line in lines_config1:
             vals = line.split(" ")
             config = [(int(vals[2*i]), int(vals[2*i+1])) for i in range(8)]
             conf1.append(config)
@@ -223,9 +223,9 @@ if __name__ == "__main__":
         path1 = [get_position(c) for c in conf1]
 
         with open(temp_config2, "r") as f:
-            lines = f.readlines()
+            lines_config2 = f.readlines()
         conf2 = []
-        for line in lines:
+        for line in lines_config2:
             vals = line.split(" ")
             config = [(int(vals[2*i]), int(vals[2*i+1])) for i in range(8)]
             conf2.append(config)
