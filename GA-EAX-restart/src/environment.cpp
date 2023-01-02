@@ -262,7 +262,7 @@ void TEnvironment::init() {
     fStage = initial_stage;
     cout << "starting from stage " << fStage << endl;
     fCurNumOfGen1 = 0;
-    fFlagC[0] = 4; /* Diversity preservation: 1:Greedy, 2:--- , 3:Distance, 4:Entropy (see Section 4) */
+    fFlagC[0] = 1; /* Diversity preservation: 1:Greedy, 2:--- , 3:Distance, 4:Entropy (see Section 4) */
     fFlagC[1] = 1; /* Eset Type: 1:Single-AB, 2:Block2 (see Section 3) */
 }
 
