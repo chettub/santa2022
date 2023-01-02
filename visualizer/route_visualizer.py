@@ -127,7 +127,7 @@ if uploaded_file is not None:
         p.add_glyph(s, glyph)
         p.add_layout(cb, "right")
     
-    st.sidebar.download_button("Download this solution", f"""{lengths[idx]} {int(scores[idx]*1000000)}\n{' '.join([str(p) for p in paths[idx]])}""", file_name=f"{idx}_{score}.txt")
+    st.sidebar.download_button("Download this solution", f"""{lengths[idx]} {int(scores[idx]*1000000)}\n{' '.join([str(p) for p in paths[idx]])}""", file_name=f"{idx}_{float(score)}.txt")
 
 
 st.bokeh_chart(p, use_container_width=False)
