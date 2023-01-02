@@ -937,7 +937,7 @@ void TCross::incrementEdgeFreq(int** fEdgeFreq) {
             // r2 - b2 add
 
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 ++fEdgeFreq[r1][b1];
                 --fEdgeFreq[r1][r2];
                 --fEdgeFreq[r2][r1];
@@ -952,7 +952,7 @@ void TCross::incrementEdgeFreq(int** fEdgeFreq) {
         b1 = fBestModiEdge[s][3];
 
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             --fEdgeFreq[aa][bb];
             --fEdgeFreq[a1][b1];
             ++fEdgeFreq[aa][a1];
@@ -998,7 +998,7 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
             DLoss += fEdgeFreq[b2][r2];
 
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 // Remove
                 --fEdgeFreq[r1][r2];
                 --fEdgeFreq[r2][r1];
@@ -1028,7 +1028,7 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
 
 
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             // Remove
             --fEdgeFreq[aa][bb];
             --fEdgeFreq[bb][aa];
@@ -1057,7 +1057,7 @@ ll TCross::calAdpLoss(int** fEdgeFreq) {
             b2 = fC[4 + 2 * j];
 
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 ++fEdgeFreq[r1][r2];
                 ++fEdgeFreq[r2][r1];
                 --fEdgeFreq[r2][b2];
@@ -1124,7 +1124,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
                 DLoss -= h1 * log(h1);
             DLoss += h2 * log(h2);
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 --fEdgeFreq[r1][r2];
                 --fEdgeFreq[r2][r1];
             }
@@ -1136,7 +1136,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             if (fEdgeFreq[r2][b2] != 0)
                 DLoss += h2 * log(h2);
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 ++fEdgeFreq[r2][b2];
                 ++fEdgeFreq[b2][r2];
             }
@@ -1156,7 +1156,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             DLoss -= h1 * log(h1);
         DLoss += h2 * log(h2);
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             --fEdgeFreq[aa][bb];
             --fEdgeFreq[bb][aa];
         }
@@ -1167,7 +1167,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             DLoss -= h1 * log(h1);
         DLoss += h2 * log(h2);
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             --fEdgeFreq[a1][b1];
             --fEdgeFreq[b1][a1];
         }
@@ -1178,7 +1178,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
         if (fEdgeFreq[aa][a1] != 0)
             DLoss += h2 * log(h2);
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             ++fEdgeFreq[aa][a1];
             ++fEdgeFreq[a1][aa];
         }
@@ -1189,7 +1189,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
         if (fEdgeFreq[bb][b1] != 0)
             DLoss += h2 * log(h2);
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             ++fEdgeFreq[bb][b1];
             ++fEdgeFreq[b1][bb];
         }
@@ -1212,7 +1212,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
             b2 = fC[4 + 2 * j];
 
             {
-                lock_guard<mutex> lock(mtx_edgefreq);
+                // lock_guard<mutex> lock(mtx_edgefreq);
                 ++fEdgeFreq[r1][r2];
                 ++fEdgeFreq[r2][r1];
                 --fEdgeFreq[r2][b2];
@@ -1227,7 +1227,7 @@ double TCross::calEntLoss(int** fEdgeFreq) {
         b1 = fModiEdge[s][3];
 
         {
-            lock_guard<mutex> lock(mtx_edgefreq);
+            // lock_guard<mutex> lock(mtx_edgefreq);
             ++fEdgeFreq[aa][bb];
             ++fEdgeFreq[bb][aa];
             ++fEdgeFreq[a1][b1];

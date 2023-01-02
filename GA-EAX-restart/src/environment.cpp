@@ -134,6 +134,7 @@ void TEnvironment::doIt() {
 
         // high cpu usage parallelization
         // has a bug in it and does not work well
+        /*
         // assert(Npop >= Nthread * 2 && Npop % Nthread == 0);
         assert(Npop >= Nthread * 2);
         vector<thread> threads(Nthread);
@@ -210,9 +211,9 @@ void TEnvironment::doIt() {
         }
         for (auto& th : threads)
             th.join();
+        */
 
         // naive parallel
-        /*
         assert(Npop % Nthread == 0);
         vector<thread> threads;
         for (int i = 0; i < Nthread; i++) {
@@ -244,7 +245,6 @@ void TEnvironment::doIt() {
         }
         for (auto& th : threads)
             th.join();
-        */
 
         ++fCurNumOfGen;
     }
