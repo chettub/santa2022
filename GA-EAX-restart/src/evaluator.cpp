@@ -94,7 +94,7 @@ void TEvaluator::setInstance(char filename[]) {
     }
 
     if (inputcsv) {
-        Magnification = 1000000ll;
+        Magnification = 10000000000ll;
         INF = 100ll;
         Len = 257;
         Ncity = Len * Len;

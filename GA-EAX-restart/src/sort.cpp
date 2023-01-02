@@ -60,7 +60,7 @@ void TSort::index(double* Arg, ll numOfArg, ll* indexOrderd, ll numOfOrd) {
     for (ll i = 0; i < numOfArg; ++i)
         checked[i] = 0;
     for (ll i = 0; i < numOfOrd; ++i) {
-        valueBest = 99999999999.9;
+        valueBest = 99999999999999999.9;
         for (ll j = 0; j < numOfArg; ++j) {
             if ((Arg[j] < valueBest) && checked[j] == 0) {
                 valueBest = Arg[j];
@@ -80,7 +80,7 @@ void TSort::indexB(double* Arg, ll numOfArg, ll* indexOrderd, ll numOfOrd) {
     for (ll i = 0; i < numOfArg; ++i)
         checked[i] = 0;
     for (ll i = 0; i < numOfOrd; ++i) {
-        valueBest = -99999999999.9;
+        valueBest = -99999999999999999.9;
         for (ll j = 0; j < numOfArg; ++j) {
             if ((Arg[j] > valueBest) && checked[j] == 0) {
                 valueBest = Arg[j];
@@ -100,7 +100,7 @@ void TSort::index(ll* Arg, ll numOfArg, ll* indexOrderd, ll numOfOrd) {
     for (ll i = 0; i < numOfArg; ++i)
         checked[i] = 0;
     for (ll i = 0; i < numOfOrd; ++i) {
-        valueBest = 99999999;
+        valueBest = 99999999999999999LL;
         for (ll j = 0; j < numOfArg; ++j) {
             if ((Arg[j] < valueBest) && checked[j] == 0) {
                 valueBest = Arg[j];
@@ -120,7 +120,7 @@ void TSort::indexB(ll* Arg, ll numOfArg, ll* indexOrderd, ll numOfOrd) {
     for (ll i = 0; i < numOfArg; ++i)
         checked[i] = 0;
     for (ll i = 0; i < numOfOrd; ++i) {
-        valueBest = -999999999;
+        valueBest = -99999999999999999LL;
         for (ll j = 0; j < numOfArg; ++j) {
             if ((Arg[j] > valueBest) && checked[j] == 0) {
                 valueBest = Arg[j];
