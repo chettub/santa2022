@@ -123,12 +123,16 @@ void TEnvironment::doIt() {
 
         int stagepre = fStage;
         if (this->terminationCondition()) {
+            duration = difftime(time(nullptr), start_time);
+            cout << "total steps = " << fCurNumOfGen << endl;
             this->writeAll("Run_" + to_string(Nrun) + "_StageII_" + to_string(duration) + ".txt", 0);
             break;
         }
         int stagecurr = fStage;
-        if (stagepre != stagecurr)
+        if (stagepre != stagecurr) {
+            duration = difftime(time(nullptr), start_time);
             this->writeAll("Run_" + to_string(Nrun) + "_StageI_" + to_string(duration) + ".txt", 0);
+        }
 
         this->selectForMating();
 
@@ -275,7 +279,7 @@ bool TEnvironment::terminationCondition() {
         Nkaizen += kaizen[i];
     }
 
-    if ((Npop - Nkaizen) > int(Npop * 0.99)) {
+    if ((Npop - Nkaizen) > min(Npop - 1, ll(Npop * (1 - minimumImprovePopulationRatio)))) {
         if (fStage == 1) {
             fFlagC[1] = 2;
             fStage = 2;
@@ -284,7 +288,7 @@ bool TEnvironment::terminationCondition() {
             return false;
         } else {
             ll dGen = fCurNumOfGen - fCurNumOfGen1;
-            if (dGen <= 200)
+            if (dGen <= minimumSteps)
                 return false;
         }
         return true;

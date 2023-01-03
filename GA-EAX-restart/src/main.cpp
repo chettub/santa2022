@@ -76,8 +76,10 @@ signed main(int argc, char* argv[]) {
 
     // ./GA-EAX-restart tsp_file NPOP NCH optimum tmax
     // default: 100, 30, -1(unknown optimum), 3600
-    if (!(9 <= argc && argc <= 11)) {
-        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax_or_-runmax seed Nthread gain_constraint [initial_route_file] [starting_stage]\n";
+    if (!(9 <= argc && argc <= 13)) {
+        cout << "./GA-EAX-restart tsp_file NPOP NCH optimum tmax_or_-runmax seed \
+gain_constraint [initial_route_file] [starting_stage] [minimum_steps] \
+[minimum_improve_population_ratio]\n";
         exit(-1);
     }
     gEnv->fFileNameTSP = argv[1];
@@ -100,6 +102,14 @@ signed main(int argc, char* argv[]) {
         gEnv->initial_stage = atoi(argv[10]);
     else
         gEnv->initial_stage = 1;
+    if (argc >= 12)
+        gEnv->minimumSteps = atoll(argv[11]);
+    else
+        gEnv->minimumSteps = 200;
+    if (argc >= 13)
+        gEnv->minimumImprovePopulationRatio = atof(argv[12]);
+    else
+        gEnv->minimumImprovePopulationRatio = 0.01;
 
     cout << "Initialization ..." << endl;
     gEnv->define();
@@ -107,10 +117,10 @@ signed main(int argc, char* argv[]) {
         printf("Run %lld\n", n);
         gEnv->Nrun = n;
         gEnv->doIt();
+        gEnv->printOn();
         if (gEnv->terminate)
             break;
     }
-    gEnv->printOn();
 
     return 0;
 }

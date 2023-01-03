@@ -94,6 +94,9 @@ public:
     int Npopnow; /* Number of population members now */
     int initial_stage;
     int Nrun;
+
+    double minimumImprovePopulationRatio;
+    ll minimumSteps;
 };
 
 #endif
