@@ -202,20 +202,20 @@ if uploaded_file is not None:
 
         if "1" in vals:
             s1 = ColumnDataSource({"xpos": [p[:, 0] for p in path1edge], "ypos": [p[:, 1] for p in path1edge], "index": [p[:, 2] for p in path1edge]})
-            glyph1 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=1, line_alpha=0.5)
+            glyph1 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=1, line_alpha=0.3, )
             p.add_glyph(s1, glyph1)
         if "2" in vals:
-            s1 = ColumnDataSource({"xpos": [p[:, 0] for p in path2edge], "ypos": [p[:, 1] for p in path2edge], "index": [p[:, 2] for p in path2edge]})
-            glyph1 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=1, line_alpha=0.5)
-            p.add_glyph(s1, glyph1)
+            s2 = ColumnDataSource({"xpos": [p[:, 0] for p in path2edge], "ypos": [p[:, 1] for p in path2edge], "index": [p[:, 2] for p in path2edge]})
+            glyph2 = MultiLine(xs="xpos", ys="ypos", line_color="red", line_width=1, line_alpha=0.3)
+            p.add_glyph(s2, glyph2)
         if "only1" in vals:
-            s1 = ColumnDataSource({"xpos": [p[:, 0] for p in path1only], "ypos": [p[:, 1] for p in path1only], "index": [p[:, 2] for p in path1only]})
-            glyph1 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=2, line_alpha=0.8)
-            p.add_glyph(s1, glyph1)
+            s3 = ColumnDataSource({"xpos": [p[:, 0] for p in path1only], "ypos": [p[:, 1] for p in path1only], "index": [p[:, 2] for p in path1only]})
+            glyph3 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=2, line_alpha=0.8)
+            p.add_glyph(s3, glyph3)
         if "only2" in vals:
-            s1 = ColumnDataSource({"xpos": [p[:, 0] for p in path2only], "ypos": [p[:, 1] for p in path2only], "index": [p[:, 2] for p in path2only]})
-            glyph1 = MultiLine(xs="xpos", ys="ypos", line_color="blue", line_width=2, line_alpha=0.8)
-            p.add_glyph(s1, glyph1)
+            s4 = ColumnDataSource({"xpos": [p[:, 0] for p in path2only], "ypos": [p[:, 1] for p in path2only], "index": [p[:, 2] for p in path2only]})
+            glyph4 = MultiLine(xs="xpos", ys="ypos", line_color="red", line_width=2, line_alpha=0.8)
+            p.add_glyph(s4, glyph4)
 
         # st.text(path1only)
         # st.text(path2only)
