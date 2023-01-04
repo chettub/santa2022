@@ -11,13 +11,15 @@
 #include "environment.h"
 #endif
 
+#include "int128.h"
 #include "util.h"
 
 std::mutex mtx;
 
 using ll = long long;
+using int128 = __int128;
 
-extern ll gBestValue;
+extern int128 gBestValue;
 extern TIndi gBest;
 extern ll duration;
 time_t start_time;
@@ -103,7 +105,7 @@ void TEnvironment::doIt() {
             gBest = tBest;
             // printf("find better solution %lld\n", gBestValue);
             if (gBestValue <= this->optimum) {
-                printf("Find optimal solution %lld, exit\n", gBestValue);
+                printf("Find optimal solution %s, exit\n", to_string_int128(gBestValue).c_str());
                 this->terminate = true;
                 break;
             }
@@ -112,7 +114,7 @@ void TEnvironment::doIt() {
             this->fTimeEnd = clock();
             // duration = (ll)((double)(this->fTimeEnd - this->fTimeStart) / (double)CLOCKS_PER_SEC);
             duration = difftime(time(nullptr), start_time);
-            printf("%lld:\t%lld:\t%lld\t%lf\n", fCurNumOfGen, duration, fBestValue, fAverageValue);
+            printf("%lld:\t%lld:\t%s\t%lf\n", fCurNumOfGen, duration, to_string_int128(fBestValue).c_str(), fAverageValue);
             fflush(stdout);
             this->writeAll("finalPopulation.txt", 1);
             this->writeBest();
@@ -335,7 +337,7 @@ bool TEnvironment::terminationCondition() {
 }
 
 void TEnvironment::setAverageBest() {
-    ll stockBest = tBest.fEvaluationValue;
+    int128 stockBest = tBest.fEvaluationValue;
     fAverageValue = 0.0;
     fBestIndex = 0;
     fBestValue = tCurPop[0].fEvaluationValue;
@@ -402,10 +404,10 @@ void TEnvironment::generateKids(ll s, int i) {
     // tCross[i]->setParents(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], fFlagC, Nch);
     // tCross[i]->doIt(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], Nch, 1, fFlagC, fEdgeFreq);
     // fAccumurateNumCh += tCross[i]->fNumOfGeneratedCh;
-    ll costbef = tCurPop[fIndexForMating[s]].fEvaluationValue;
+    int128 costbef = tCurPop[fIndexForMating[s]].fEvaluationValue;
     tCross[i]->setParents(tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s + 1]], fFlagC, Nch);
     tCross[i]->doIt(tCurPop[fIndexForMating[s]], tCurPop[fIndexForMating[s + 1]], Nch, 1, fFlagC, fEdgeFreq);
-    ll costnew = tCurPop[fIndexForMating[s]].fEvaluationValue;
+    int128 costnew = tCurPop[fIndexForMating[s]].fEvaluationValue;
     kaizen[fIndexForMating[s]] = costnew < costbef;
     fAccumurateNumCh += tCross[i]->fNumOfGeneratedCh;
 }
@@ -415,10 +417,10 @@ void TEnvironment::generateKids(ll s1, ll s2, int i) {
     /* Note: tCurPop[fIndexForMating[s]] is replaced with a best offspring solutions in tCorss->DoIt().
      fEegeFreq[][] is also updated there. */
     // update s1
-    ll costbef = tCurPop[fIndexForMating[s1]].fEvaluationValue;
+    int128 costbef = tCurPop[fIndexForMating[s1]].fEvaluationValue;
     tCross[i]->setParents(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], fFlagC, Nch);
     tCross[i]->doIt(tCurPop[fIndexForMating[s1]], tCurPop[fIndexForMating[s2]], Nch, 1, fFlagC, fEdgeFreq);
-    ll costnew = tCurPop[fIndexForMating[s1]].fEvaluationValue;
+    int128 costnew = tCurPop[fIndexForMating[s1]].fEvaluationValue;
     {
         lock_guard<mutex> lock(mtx);
         kaizen[fIndexForMating[s1]] = costnew < costbef;
@@ -450,7 +452,7 @@ void TEnvironment::getEdgeFreq() {
 
 void TEnvironment::printOn() {
     printf("Total time: %lld\n", duration);
-    printf("bestval = %lld, optimum = %lld \n", gBestValue, this->optimum);
+    printf("bestval = %s, optimum = %lld \n", to_string_int128(gBestValue).c_str(), this->optimum);
     // fEvaluator->writeToStdout(gBest);
     if (gBestValue != -1 && gBestValue <= this->optimum)
         printf("Successful\n");
@@ -477,7 +479,7 @@ void TEnvironment::writeAll(const string path, bool flag_final_route) {
     const char* filename = path.data();
 
     // sort indi by EvaluationValue
-    vector<pair<ll, int>> V(Npop);
+    vector<pair<int128, int>> V(Npop);
     for (int i = 0; i < Npop; i++) {
         V[i] = {tCurPop[i].fEvaluationValue, i};
     }

@@ -2,12 +2,17 @@
 #include "cross.h"
 #endif
 
+#include <boost/multiprecision/cpp_dec_float.hpp>
+namespace mp = boost::multiprecision;
+
 #include <mutex>
 
+#include "int128.h"
 
 std::mutex mtx_edgefreq;
 
 using ll = long long;
+using int128 = __int128;
 
 TCross::TCross(ll N) {
     fMaxNumOfABcycle = 4000; /* Set an appropriate value (2000 is usually enough) */
@@ -56,7 +61,7 @@ TCross::TCross(ll N) {
 
     fListOfCenterUnit = new ll[fN + 2];
     fSegForCenter = new ll[fN];
-    fGainAB = new ll[fN];
+    fGainAB = new int128[fN];
     fModiEdge = new ll*[fN];
     for (ll j = 0; j < fN; ++j)
         fModiEdge[j] = new ll[4];
@@ -187,15 +192,15 @@ void TCross::setParents(const TIndi& tPa1, const TIndi& tPa2, ll flagC[10], ll n
 void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10], int** fEdgeFreq) {
     ll Num;
     ll jnum, centerAB;
-    ll gain;
-    ll BestGain;
+    int128 gain;
+    int128 BestGain;
     double pollMax, poll;
     double DLoss;
 
     // NEW
-    ll gainoffset = 0;
+    int128 gainoffset = 0;
     {
-        ll CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
+        int128 CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
         gainoffset += CostConstraintViolation;
     }
     // END
@@ -263,7 +268,7 @@ void TCross::doIt(TIndi& tKid, TIndi& tPa2, ll numOfKids, ll flagP, ll flagC[10]
 
         // NEW
         {
-            ll CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
+            int128 CostConstraintViolation = eval->funcCostConstraintViolation(tKid);
             gain += gainoffset - CostConstraintViolation;
         }
         // END
@@ -469,7 +474,7 @@ void TCross::formABcycle() {
     ll edge_type;
     ll st, ci, stock;
     ll cem;
-    ll diff;
+    int128 diff;
 
     if (fPosiCurr % 2 == 0)
         edge_type = 1;
@@ -596,7 +601,7 @@ void TCross::makeCompleteSol(TIndi& tKid) {
     ll st, pre, curr, next, a, b, c, d, aa, bb, a1, b1;
     ll min_unit_city;
     ll center_un, select_un;
-    ll diff, max_diff;
+    int128 diff, max_diff;
     ll near_num, nearMax;
 
     fGainModi = 0;
@@ -636,7 +641,12 @@ void TCross::makeCompleteSol(TIndi& tKid) {
         fListOfCenterUnit[fNumOfElementInCU] = fListOfCenterUnit[0];
         fListOfCenterUnit[fNumOfElementInCU + 1] = fListOfCenterUnit[1];
 
-        max_diff = -99999999999999999LL;
+        // max_diff = -99999999999999999LL;
+        max_diff = -1;
+        for (int i = 0; i < 32; i++) {
+            max_diff *= 10;
+        }
+
         a1 = -1;
         b1 = -1;
         nearMax = 10; /* N_near (see Step 5.3 in Section 2.2 of the Online Supplement) */

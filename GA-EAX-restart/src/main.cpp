@@ -8,6 +8,8 @@
 #include "environment.h"
 #endif
 
+#include "int128.h"
+
 #include <csignal>
 #include <iostream>
 #include <stdio.h>
@@ -15,12 +17,13 @@
 using namespace std;
 
 using ll = long long;
+using int128 = __int128;
 
-ll gBestValue = -1;  // global best value
-TIndi gBest;         // global best solution
-ll optimum;          // optimum cost
-ll duration;         // used time
-                     //
+int128 gBestValue = -1;  // global best value
+TIndi gBest;             // global best solution
+ll optimum;              // optimum cost
+ll duration;             // used time
+                         //
 TEnvironment* gEnv = new TEnvironment();
 
 void signalHandler(int signum) {
@@ -29,7 +32,7 @@ void signalHandler(int signum) {
     cout << endl;
 
     printf("Total time: %lld\n", duration);
-    printf("bestval = %lld, optimum = %lld \n", gBestValue, optimum);
+    printf("bestval = %s, optimum = %lld \n", to_string_int128(gBestValue).c_str(), optimum);
 
     gEnv->writeAll("Interrupted_" + to_string(duration) + ".txt", 0);
 
@@ -52,7 +55,7 @@ void signalHandler(int signum) {
         if (curr == st)
             break;
     }
-    printf("%lld %lld\n", gBest.fN, gBest.fEvaluationValue);
+    printf("%lld %s\n", gBest.fN, to_string_int128(gBest.fEvaluationValue).c_str());
     // for (ll i = 0; i < gBest.fN; ++i)
     //     printf("%lld ", Array[i]);
     // printf("\n");

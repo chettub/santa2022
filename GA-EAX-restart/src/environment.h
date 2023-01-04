@@ -31,6 +31,7 @@
 
 
 using ll = long long;
+using int128 = __int128;
 
 class TEnvironment {
 public:
@@ -74,7 +75,7 @@ public:
     ll fBestAccumeratedNumCh; /* The accumulated number of offspring solutions at which the current best solution was found */
     int** fEdgeFreq;          /* The frequency of the edges of the population */
     double fAverageValue;     /* The average tour lengths of the population */
-    ll fBestValue;            /* The tour lenght of the best tour in the population */
+    int128 fBestValue;        /* The tour lenght of the best tour in the population */
     ll fBestIndex;            /* Index of the best population member */
 
     ll* fIndexForMating; /* Mating list (r[] in the paper) */

@@ -102,7 +102,7 @@ private:
     ll fNumOfSPL;
     ll fNumOfElementInCU;
     ll fNumOfSegForCenter;
-    ll fGainModi;
+    int128 fGainModi;
     ll fNumOfModiEdge;
     ll fNumOfBestModiEdge;
     ll fNumOfAppliedCycle;
@@ -118,7 +118,7 @@ private:
     ll* fCenterUnit;
     ll* fListOfCenterUnit;
     ll* fSegForCenter;
-    ll* fGainAB;
+    int128* fGainAB;
     ll* fAppliedCylce;
     ll* fBestAppliedCylce;
 

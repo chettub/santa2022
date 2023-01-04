@@ -1,9 +1,15 @@
 #include <bits/stdc++.h>
 #include <iostream>
 
+#include <boost/multiprecision/cpp_dec_float.hpp>
+namespace mp = boost::multiprecision;
+
 #ifndef __EVALUATOR__
 #include "evaluator.h"
 #endif
+
+#include "int128.h"
+using int128 = __int128;
 
 using namespace std;
 using ll = long long;
@@ -94,8 +100,12 @@ void TEvaluator::setInstance(char filename[]) {
     }
 
     if (inputcsv) {
-        Magnification = 10000000000ll;
-        INF = 100ll;
+        Magnification = 1;
+        for (size_t i = 0; i < 20; i++) {
+            Magnification *= 10;
+        }
+
+        INF = 100;
         Len = 257;
         Ncity = Len * Len;
         Center = 128;
@@ -109,9 +119,9 @@ void TEvaluator::setInstance(char filename[]) {
             Image[x][y] = {r, g, b};
         }
 
-        fEdgeDis = new ll*[Ncity];
+        fEdgeDis = new int128*[Ncity];
         for (ll i = 0; i < Ncity; ++i) {
-            fEdgeDis[i] = new ll[17 * 17];
+            fEdgeDis[i] = new int128[17 * 17];
             for (int j = 0; j < 17 * 17; j++) {
                 fEdgeDis[i][j] = INF * Magnification;
             }
@@ -129,7 +139,10 @@ void TEvaluator::setInstance(char filename[]) {
                         if (!checkin(x2, y2))
                             continue;
                         int idx2 = encodesmall(dx, dy);
-                        fEdgeDis[idx1][idx2] = (ll)(0.5 + Magnification * (sqrt(abs(dx) + abs(dy)) + 3 * (abs(Image[x1][y1][0] - Image[x2][y2][0]) + abs(Image[x1][y1][1] - Image[x2][y2][1]) + abs(Image[x1][y1][2] - Image[x2][y2][2]))));
+                        double tmp = 0;
+                        tmp += sqrt(abs(dx) + abs(dy));
+                        tmp += 3 * (abs(Image[x1][y1][0] - Image[x2][y2][0]) + abs(Image[x1][y1][1] - Image[x2][y2][1]) + abs(Image[x1][y1][2] - Image[x2][y2][2]));
+                        fEdgeDis[idx1][idx2] = (int128)(0.5 + Magnification * tmp);
                     }
                 }
             }
@@ -161,7 +174,7 @@ void TEvaluator::setInstance(char filename[]) {
         ll* checkedN = new ll[Ncity];
         ll ci, j1, j2, j3;
         ll cityNum = 0;
-        ll minDis;
+        int128 minDis;
         for (ci = 0; ci < Ncity; ++ci) {
             for (j3 = 0; j3 < Ncity; ++j3)
                 checkedN[j3] = 0;
@@ -212,9 +225,9 @@ void TEvaluator::setInstance(char filename[]) {
             }
         }
 
-        fEdgeDis = new ll*[Ncity];
+        fEdgeDis = new int128*[Ncity];
         for (ll i = 0; i < Ncity; ++i)
-            fEdgeDis[i] = new ll[Ncity];
+            fEdgeDis[i] = new int128[Ncity];
 
         if (strcmp(type, "EUC_2D") == 0) {
             for (ll i = 0; i < Ncity; ++i)
@@ -304,7 +317,7 @@ void TEvaluator::setInstance(char filename[]) {
 }
 
 
-ll TEvaluator::funcEdgeDis(int i, int j) {
+int128 TEvaluator::funcEdgeDis(int i, int j) {
     if (inputcsv) {
         auto [x1, y1] = decode(i);
         auto [x2, y2] = decode(j);
@@ -321,7 +334,7 @@ ll TEvaluator::funcEdgeDis(int i, int j) {
 }
 
 void TEvaluator::doIt(TIndi& indi) {
-    ll d = 0;
+    int128 d = 0;
     for (ll i = 0; i < Ncity; ++i)
         d += funcEdgeDis(i, indi.fLink[i][0]) + funcEdgeDis(i, indi.fLink[i][1]);
     indi.fEvaluationValue = d / 2;
@@ -349,7 +362,7 @@ void TEvaluator::writeTo(FILE* fp, TIndi& indi) {
     if (this->checkValid(Array, indi.fEvaluationValue) == false)
         printf("Individual is invalid \n");
 
-    fprintf(fp, "%lld %lld\n", indi.fN, indi.fEvaluationValue);
+    fprintf(fp, "%lld %s\n", indi.fN, to_string_int128(indi.fEvaluationValue).c_str());
     for (ll i = 0; i < indi.fN; ++i)
         fprintf(fp, "%lld ", Array[i]);
     fprintf(fp, "\n");
@@ -379,14 +392,14 @@ void TEvaluator::writeToStdout(TIndi& indi) {
     if (this->checkValid(Array, indi.fEvaluationValue) == false)
         printf("Individual is invalid \n");
 
-    printf("%lld %lld\n", indi.fN, indi.fEvaluationValue);
+    printf("%lld %s\n", indi.fN, to_string_int128(indi.fEvaluationValue).c_str());
     for (ll i = 0; i < indi.fN; ++i)
         printf("%lld ", Array[i]);
     printf("\n");
     delete[] Array;
 }
 
-bool TEvaluator::checkValid(ll* array, ll value) {
+bool TEvaluator::checkValid(ll* array, int128 value) {
     ll* check = new ll[Ncity];
     for (ll i = 0; i < Ncity; ++i)
         check[i] = 0;
@@ -395,11 +408,6 @@ bool TEvaluator::checkValid(ll* array, ll value) {
     for (ll i = 0; i < Ncity; ++i)
         if (check[i] != 1)
             return false;
-    ll distance = 0;
-    for (ll i = 0; i < Ncity - 1; ++i)
-        distance += funcEdgeDis(array[i] - 1, array[i + 1] - 1);
-
-    distance += funcEdgeDis(array[Ncity - 1] - 1, array[0] - 1);
 
     delete[] check;
 
@@ -407,14 +415,20 @@ bool TEvaluator::checkValid(ll* array, ll value) {
     return true;
     // END
 
+    int128 distance = 0;
+    for (ll i = 0; i < Ncity - 1; ++i)
+        distance += funcEdgeDis(array[i] - 1, array[i + 1] - 1);
+
+    distance += funcEdgeDis(array[Ncity - 1] - 1, array[0] - 1);
+
     if (distance != value)
         return false;
     return true;
 }
 
-ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
+int128 TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
     if (GainConstraint == 0.0)
-        return 0ll;
+        return 0;
     int Nviolation = 0;
     // 原点回りの制約
     // (0,0)->(0,1)
@@ -556,6 +570,6 @@ ll TEvaluator::funcCostConstraintViolation(const TIndi& indi) const {
         }
     }
 
-    ll cost = ll(GainConstraint * (long double)(Magnification * Nviolation) + 0.5);
+    int128 cost = int128(int(GainConstraint + 0.5) * (Magnification * Nviolation) + 0.5);
     return cost;
 }

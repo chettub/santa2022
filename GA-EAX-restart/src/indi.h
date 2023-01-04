@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 using ll = long long;
+using int128 = __int128;
 
 class TIndi {
 public:
@@ -18,9 +19,9 @@ public:
     ll next(const ll cur, const ll bef) const;   /* next vertex*/
     bool has_edge(const ll u, const ll v) const; /* check is has edge u-v */
 
-    ll fN;               /* Number of cities */
-    ll** fLink;          /* fLink[i][]: two vertices adjacent to i */
-    ll fEvaluationValue; /* Tour length of */
+    ll fN;                   /* Number of cities */
+    ll** fLink;              /* fLink[i][]: two vertices adjacent to i */
+    int128 fEvaluationValue; /* Tour length of */
 };
 
 #endif
