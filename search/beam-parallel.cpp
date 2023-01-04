@@ -309,15 +309,19 @@ int main(int argc, char* argv[]) {
         }
 
         bool check_possible = false;
-        for (int jnow = 0; jnow < 64 * 8; jnow++) {
-            for (int know = 0; know < 32 * 8; know++) {
-                if (ok6432[i][jnow][know]) {
-                    check_possible = true;
-                    break;
+        if (i == 0) {
+            check_possible = ok6432[i][5 * 64][32];
+        } else {
+            for (int jnow = 0; jnow < 64 * 8; jnow++) {
+                for (int know = 0; know < 32 * 8; know++) {
+                    if (ok6432[i][jnow][know]) {
+                        check_possible = true;
+                        break;
+                    }
                 }
+                if (check_possible)
+                    break;
             }
-            if (check_possible)
-                break;
         }
         if (!check_possible) {
             cerr << "cannot move arm 64,32 from " << i + 1 << " to " << i << endl;
