@@ -100,22 +100,66 @@ void TEvaluator::setInstance(char filename[]) {
     }
 
     if (inputcsv) {
+        const int magnification_digits = 30;
         Magnification = 1;
-        for (size_t i = 0; i < 20; i++) {
+        for (size_t i = 0; i < magnification_digits; i++) {
             Magnification *= 10;
         }
+        vector<int128> sqrt_int128(9, 0);
+        string sqrt2 = "1414213562373095048801688724209";
+        string sqrt3 = "1732050807568877293527446341505";
+        string sqrt5 = "2236067977499789696409173668731";
+        string sqrt6 = "2449489742783178098197284074705";
+        string sqrt7 = "2645751311064590590501615753639";
+        sqrt_int128[0] = 0;
+        sqrt_int128[1] = Magnification;
+        sqrt_int128[2] = parse(sqrt2);
+        sqrt_int128[3] = parse(sqrt3);
+        sqrt_int128[4] = 2 * Magnification;
+        sqrt_int128[5] = parse(sqrt5);
+        sqrt_int128[6] = parse(sqrt6);
+        sqrt_int128[7] = parse(sqrt7);
+        sqrt_int128[8] = 2 * sqrt_int128[2];
 
         INF = 100;
         Len = 257;
         Ncity = Len * Len;
         Center = 128;
-        Image.assign(Len, vector<vector<double>>(Len, vector<double>(3, 0.)));
+        Image.assign(Len, vector<vector<int128>>(Len, vector<int128>(3, 0.)));
         int x, y;
-        double r, g, b;
+        int r1, g1, b1;
+        char r0[20], g0[20], b0[20];
         for (int i = 0; i < Ncity; i++) {
-            fscanf(fp, "%d,%d,%lf,%lf,%lf", &x, &y, &r, &g, &b);
+            fscanf(fp, "%d,%d,%d.%[^,],%d.%[^,],%d.%s", &x, &y, &r1, r0, &g1, g0, &b1, b0);
             x += Center;
             y += Center;
+            string rs = to_string(r1);
+            string gs = to_string(g1);
+            string bs = to_string(b1);
+
+            // cout << rs << " " << gs << " " << bs << endl;
+
+            rs += r0;
+            gs += g0;
+            bs += b0;
+
+            // cout << rs << " " << gs << " " << bs << endl;
+
+            int128 r = parse(rs);
+            for (int j = 0; j < magnification_digits - (rs.size() - 1); ++j) {
+                r *= 10;
+            }
+            int128 g = parse(gs);
+            for (int j = 0; j < magnification_digits - (gs.size() - 1); ++j) {
+                g *= 10;
+            }
+            int128 b = parse(bs);
+            for (int j = 0; j < magnification_digits - (bs.size() - 1); ++j) {
+                b *= 10;
+            }
+
+            // cout << r << " " << g << " " << b << endl;
+
             Image[x][y] = {r, g, b};
         }
 
@@ -139,10 +183,10 @@ void TEvaluator::setInstance(char filename[]) {
                         if (!checkin(x2, y2))
                             continue;
                         int idx2 = encodesmall(dx, dy);
-                        double tmp = 0;
-                        tmp += sqrt(abs(dx) + abs(dy));
-                        tmp += 3 * (abs(Image[x1][y1][0] - Image[x2][y2][0]) + abs(Image[x1][y1][1] - Image[x2][y2][1]) + abs(Image[x1][y1][2] - Image[x2][y2][2]));
-                        fEdgeDis[idx1][idx2] = (int128)(0.5 + Magnification * tmp);
+                        int128 tmp = 0;
+                        tmp += sqrt_int128[abs(dx) + abs(dy)];
+                        tmp += int128(3) * (abs_int128(Image[x1][y1][0] - Image[x2][y2][0]) + abs_int128(Image[x1][y1][1] - Image[x2][y2][1]) + abs_int128(Image[x1][y1][2] - Image[x2][y2][2]));
+                        fEdgeDis[idx1][idx2] = tmp;
                     }
                 }
             }
@@ -296,14 +340,14 @@ void TEvaluator::setInstance(char filename[]) {
     ll* checkedN = new ll[Ncity];
     ll ci, j1, j2, j3;
     ll cityNum = 0;
-    ll minDis;
+    int128 minDis;
     for (ci = 0; ci < Ncity; ++ci) {
         for (j3 = 0; j3 < Ncity; ++j3)
             checkedN[j3] = 0;
         checkedN[ci] = 1;
         fNearCity[ci][0] = ci;
         for (j1 = 1; j1 <= fNearNumMax; ++j1) {
-            minDis = 10000000000ll;
+            minDis = numeric_limits<int128>::max();
             for (j2 = 0; j2 < Ncity; ++j2) {
                 if (funcEdgeDis(ci, j2) <= minDis && checkedN[j2] == 0) {
                     cityNum = j2;

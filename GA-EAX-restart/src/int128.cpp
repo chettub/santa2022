@@ -44,3 +44,7 @@ string to_string_int128(int128 value) {
     reverse(s.begin(), s.end());
     return s;
 }
+
+int128 abs_int128(int128 a) {
+    return a >= 0 ? a : -a;
+}

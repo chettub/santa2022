@@ -641,11 +641,7 @@ void TCross::makeCompleteSol(TIndi& tKid) {
         fListOfCenterUnit[fNumOfElementInCU] = fListOfCenterUnit[0];
         fListOfCenterUnit[fNumOfElementInCU + 1] = fListOfCenterUnit[1];
 
-        // max_diff = -99999999999999999LL;
-        max_diff = -1;
-        for (int i = 0; i < 32; i++) {
-            max_diff *= 10;
-        }
+        max_diff = numeric_limits<int128>::min();
 
         a1 = -1;
         b1 = -1;
@@ -1362,7 +1358,7 @@ ll TCross::calCNaive() {
 
 void TCross::searchEset(ll centerAB) {
     ll nIter, stagImp;
-    ll delta_weight, min_delta_weight_nt;
+    int128 delta_weight, min_delta_weight_nt;
     ll flag_AddDelete, flag_AddDelete_nt;
     ll selected_AB, selected_AB_nt;
     ll jnum;
@@ -1388,7 +1384,7 @@ void TCross::searchEset(ll centerAB) {
     nIter = 0;
     while (1) {
         ++nIter;
-        min_delta_weight_nt = 99999999999999999LL;
+        min_delta_weight_nt = numeric_limits<int128>::max();
         flag_AddDelete = 0;
         flag_AddDelete_nt = 0;
         for (ll s1 = 0; s1 < fNumOfABcycle; ++s1) {

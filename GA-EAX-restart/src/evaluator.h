@@ -49,7 +49,7 @@ public:
     int Center;
     int128 Magnification;
     int128 INF;
-    vector<vector<vector<double>>> Image;
+    vector<vector<vector<int128>>> Image;
     double GainConstraint;
 };
 

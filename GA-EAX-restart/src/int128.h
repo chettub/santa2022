@@ -9,3 +9,6 @@ std::ostream& operator<<(std::ostream& dest, __int128_t value);
 __int128 parse(string& s);
 
 string to_string_int128(int128 value);
+
+int128 abs_int128(int128 a);
+
