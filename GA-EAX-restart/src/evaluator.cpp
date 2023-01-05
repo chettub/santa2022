@@ -100,7 +100,7 @@ void TEvaluator::setInstance(char filename[]) {
     }
 
     if (inputcsv) {
-        const int magnification_digits = 30;
+        const int magnification_digits = 25;
         Magnification = 1;
         for (size_t i = 0; i < magnification_digits; i++) {
             Magnification *= 10;
