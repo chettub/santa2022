@@ -106,11 +106,11 @@ void TEvaluator::setInstance(char filename[]) {
             Magnification *= 10;
         }
         vector<int128> sqrt_int128(9, 0);
-        string sqrt2 = "1414213562373095048801688724209";
-        string sqrt3 = "1732050807568877293527446341505";
-        string sqrt5 = "2236067977499789696409173668731";
-        string sqrt6 = "2449489742783178098197284074705";
-        string sqrt7 = "2645751311064590590501615753639";
+        string sqrt2 = "14142135623730950488016887";
+        string sqrt3 = "17320508075688772935274463";
+        string sqrt5 = "22360679774997896964091736";
+        string sqrt6 = "24494897427831780981972840";
+        string sqrt7 = "26457513110645905905016157";
         sqrt_int128[0] = 0;
         sqrt_int128[1] = Magnification;
         sqrt_int128[2] = parse(sqrt2);
