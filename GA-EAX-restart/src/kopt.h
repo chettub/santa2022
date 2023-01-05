@@ -52,7 +52,7 @@ private:
     ll fFixNumOfSeg;
     ll fNumOfSeg;
     ll fFlagRev;
-    ll fTourLength;
+    int128 fTourLength;
 
     ll** fLink;
     ll** fLinkSeg;

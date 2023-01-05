@@ -169,7 +169,7 @@ void TKopt::doIt(TIndi& tIndi) {
 
 void TKopt::sub() {
     ll t1_st;
-    ll dis1, dis2;
+    int128 dis1, dis2;
     for (ll t = 0; t < fN; ++t)
         fActiveV[t] = 1;
 BEGIN:
