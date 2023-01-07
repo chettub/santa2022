@@ -48,7 +48,7 @@ TEvaluator::TEvaluator() {
     fEdgeDis = NULL;
     fNearCity = NULL;
     Ncity = 0;
-    fNearNumMax = 50;
+    fNearNumMax = 256;
     inputcsv = false;
 }
 
