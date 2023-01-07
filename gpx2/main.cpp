@@ -84,10 +84,12 @@ int128 penalty(vector<int>& path) {
                     cntxminus += x2 < x1;
                     if (x2 < 128) {
                         penalty++;
+                        cout << "x < 0 pen" << endl;
                         break;
                     }
                     if ((cntyplus + cntyminus) * 2 < cntxplus) {
                         penalty++;
+                        cout << "x > 2*y pen" << endl;
                         break;
                     }
                     cntyplus += y2 > y1;
@@ -110,10 +112,12 @@ int128 penalty(vector<int>& path) {
                     cntxminus += x2 < x1;
                     if (x2 < 128) {
                         penalty++;
+                        cout << "x < 0 pen" << endl;
                         break;
                     }
                     if ((cntyplus + cntyminus) * 2 < cntxplus) {
                         penalty++;
+                        cout << "x > 2*y pen" << endl;
                         break;
                     }
                     cntyplus += y2 > y1;
@@ -137,8 +141,10 @@ int128 penalty(vector<int>& path) {
                         oky = true;
                     curr = (curr + 1) % n_cities;
                 }
-                if (!okx || !oky)
+                if (!okx || !oky) {
                     penalty++;
+                    cout << "1, 1 pen" << endl;
+                }
             }
             {
                 bool okx = false, oky = false;
@@ -151,8 +157,10 @@ int128 penalty(vector<int>& path) {
                         oky = true;
                     curr = (curr + n_cities - 1) % n_cities;
                 }
-                if (!okx || !oky)
+                if (!okx || !oky) {
                     penalty++;
+                    cout << "1, 1 pen" << endl;
+                }
             }
 
         } else if (path[i] == corner2) {
@@ -160,7 +168,7 @@ int128 penalty(vector<int>& path) {
             {
                 bool okx = false, oky = false;
                 int curr = i;
-                for (int j = 0; j < 255; ++j) {
+                for (int j = 0; j < 254; ++j) {
                     auto [x1, y1] = decode(path[curr]);
                     if (x1 != 255)
                         okx = true;
@@ -168,13 +176,15 @@ int128 penalty(vector<int>& path) {
                         oky = true;
                     curr = (curr + 1) % n_cities;
                 }
-                if (!okx || !oky)
+                if (!okx || !oky) {
                     penalty++;
+                    cout << "255, 255 pen" << endl;
+                }
             }
             {
                 bool okx = false, oky = false;
                 int curr = i;
-                for (int j = 0; j < 255; ++j) {
+                for (int j = 0; j < 254; ++j) {
                     auto [x1, y1] = decode(path[curr]);
                     if (x1 != 255)
                         okx = true;
@@ -182,31 +192,100 @@ int128 penalty(vector<int>& path) {
                         oky = true;
                     curr = (curr + n_cities - 1) % n_cities;
                 }
-                if (!okx || !oky)
+                if (!okx || !oky) {
                     penalty++;
+                    cout << "255, 255 pen" << endl;
+                }
             }
         }
         if (cnt == 3)
             break;
     }
-    vector<vector<int>> quadcnt(n_cities + 300, vector<int>(4, 0));
-    for (int i = 0; i < n_cities; i++) {
-        int q = quadrant(path[i]);
-        quadcnt[i][q]++;
-        quadcnt[i + 257][q]--;
-    }
-    for (int i = 0; i < n_cities; i++) {
-		int qs = 0;
-        for (int q = 0; q < 4; ++q) {
-            quadcnt[i + 1][q] += quadcnt[i][q];
-			if (quadcnt[i + 1][q] > 0)
-				qs++;
-        }
-		if (qs == 4) {
-			penalty++;
-			break;
+    for (int i = 0; i < 2; ++i) {
+        int xnow, xbef, ynow, ybef;
+        int now, bef;
+        if (i == 0) {
+            xnow = 128;
+            xbef = 128 + 1;
+            ynow = 128 - 4;
+            ybef = 128 - 4;
+        } else if (i == 1) {
+            xnow = 128;
+            xbef = 128 + 1;
+            ynow = 128 - 5;
+            ybef = 128 - 5;
+        } else {
+			assert(false);
 		}
+		now = encode(xnow, ynow);
+		bef = encode(xbef, ybef);
+		int inow = -1;
+		int ibef = -1;
+		for (int j = 0; j < n_cities; ++j) {
+			if (path[j] == now)
+				inow = j;
+			if (path[j] == bef)
+				ibef = j;
+		}
+		if (abs(inow - ibef) != 1) {
+			continue;
+		}
+		int dir = inow - ibef;
+		int cntyplus = 0;
+		vector<bool> isinquad(5, false);
+		for (int j = 0; j < 2000; j++) {
+			ibef = inow;
+			inow = (inow + n_cities + dir) % n_cities;
+			now = path[inow];
+			bef = path[ibef];
+			auto [xnow, ynow] = decode(now);
+			auto [xbef, ybef] = decode(bef);
+			int nowquad = quadrant(now);
+			isinquad[nowquad] = true;
+
+			if (isinquad[4])
+				break;
+			if (isinquad[1]) {
+				if (isinquad[2] || isinquad[3])
+					penalty++;
+				break;
+			}
+			cntyplus += ynow > ybef;
+			if (cntyplus >= 128)
+				break;
+		}		
     }
+    // vector<vector<int>> quadcnt(n_cities + 300, vector<int>(5, 0));
+    // vector<int> yplus(n_cities + 300, 0);
+    // vector<int> yminus(n_cities + 300, 0);
+    // vector<int> xplus(n_cities + 300, 0);
+    // vector<int> yminus(n_cities + 300, 0);
+    // for (int i = 0; i < n_cities; i++) {
+    //     int q = quadrant(path[i]);
+    //     quadcnt[i][q]++;
+    //     quadcnt[i + 256][q]--;
+    //     if (i != 0) {
+    //         auto [cx, cy] = decode(path[i]);
+    //         auto [px, py] = decode(path[i - 1]);
+    // 		yplus[i] = cy - py > 0;
+    // 		yminus[i] = cy - py < 0;
+    // 		xplus[i] = cx - px > 0;
+    // 		xminus[i] = cx - px > 0;
+    //     }
+    // }
+    // for (int i = 0; i < n_cities + 256; i++) {
+    //     int qs = 0;
+    //     for (int q = 1; q < 5; ++q) {
+    //         quadcnt[i + 1][q] += quadcnt[i][q];
+    //         if (quadcnt[i + 1][q] > 0)
+    //             qs++;
+    //     }
+    //     if (qs == 4) {
+    //         penalty++;
+    //         cout << "quad pen at " << i << endl;
+    //         break;
+    //     }
+    // }
 
     return penalty * Magnification;
 }
@@ -261,7 +340,7 @@ int main(int argc, char* argv[]) {
     int n_cities = 257 * 257;
 
     cout << "\n ***** Example: recombination of all paths from file ****" << endl;
-	cout << "Magnification " << Magnification << endl;
+    cout << "Magnification " << Magnification << endl;
     vector<int> p3(n_cities, 1);
     vector<int> p4(n_cities, 1);
 
@@ -269,7 +348,7 @@ int main(int argc, char* argv[]) {
     p3 = paths[0];
     vector<int> offspring2(n_cities, 0);
     // rand_init(p1, p2);  // random initialization of the parents
-    string best_cost_str = "7407570654169005380529794198251561821613";
+    string best_cost_str = "740757065416900538052979419825";
     int128 best_cost = parse(best_cost_str);
     // Recombination by GPX2
     for (int ii = 0; ii < paths.size(); ii++) {
@@ -283,13 +362,15 @@ int main(int argc, char* argv[]) {
             int128 cost_restrictions = total_cost(offspring2);
             cout << "new cost        : " << cost_restrictions << endl;
             p3 = offspring2;
-            if (cost < best_cost) {
+            if (cost_restrictions < best_cost) {
                 cout << "best score updated !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! save results." << endl;
                 // write_path_to_file("./output/" + to_string_int128(cost) + ".txt", offspring2);
                 write_path_to_file("./output/best.txt", offspring2);
-                best_cost = cost;
+                best_cost = cost_restrictions;
             }
+            // break;
         }
+        // break;
     }
 
     // if (n_cities <= 15000)
