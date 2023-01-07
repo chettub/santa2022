@@ -43,12 +43,181 @@ void rand_init(int* p1, int* p2) {
     delete[] v_in;
 }
 
+int quadrant(int x, int y) {
+    if (x > 128 && y > 128)
+        return 1;
+    else if (x < 128 && y > 128)
+        return 2;
+    else if (x < 128 && y < 128)
+        return 3;
+    else if (x > 128 && y < 128)
+        return 4;
+    else
+        return 0;
+}
+
+int quadrant(int idx) {
+    auto [x, y] = decode(idx);
+    return quadrant(x, y);
+}
+
+int128 penalty(vector<int>& path) {
+    int center = encode(128, 128);
+    int corner1 = encode(1, 1);
+    int corner2 = encode(255, 255);
+
+    int128 penalty = 0;
+
+    int cnt = 0;
+    for (int i = 0; i < path.size(); i++) {
+        if (path[i] == center) {
+            cnt++;
+            {
+                int cntyplus = 0, cntyminus = 0;
+                int cntxplus = 0, cntxminus = 0;
+                int curr = i;
+                int next = (curr + 1) % n_cities;
+                while (true) {
+                    auto [x1, y1] = decode(path[curr]);
+                    auto [x2, y2] = decode(path[next]);
+                    cntxplus += x2 > x2;
+                    cntxminus += x2 < x1;
+                    if (x2 < 128) {
+                        penalty++;
+                        break;
+                    }
+                    if ((cntyplus + cntyminus) * 2 < cntxplus) {
+                        penalty++;
+                        break;
+                    }
+                    cntyplus += y2 > y1;
+                    cntyminus += y2 > y1;
+                    if (cntyplus >= 64 && cntyminus >= 64)
+                        break;
+                    curr = (curr + 1) % n_cities;
+                    next = (next + 1) % n_cities;
+                }
+            }
+            {
+                int cntyplus = 0, cntyminus = 0;
+                int cntxplus = 0, cntxminus = 0;
+                int curr = i;
+                int next = (curr + n_cities - 1) % n_cities;
+                while (true) {
+                    auto [x1, y1] = decode(path[curr]);
+                    auto [x2, y2] = decode(path[next]);
+                    cntxplus += x2 > x2;
+                    cntxminus += x2 < x1;
+                    if (x2 < 128) {
+                        penalty++;
+                        break;
+                    }
+                    if ((cntyplus + cntyminus) * 2 < cntxplus) {
+                        penalty++;
+                        break;
+                    }
+                    cntyplus += y2 > y1;
+                    cntyminus += y2 > y1;
+                    if (cntyplus >= 64 && cntyminus >= 64)
+                        break;
+                    curr = (curr + n_cities - 1) % n_cities;
+                    next = (next + n_cities - 1) % n_cities;
+                }
+            }
+        } else if (path[i] == corner1) {
+            cnt++;
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 1)
+                        okx = true;
+                    if (y1 != 1)
+                        oky = true;
+                    curr = (curr + 1) % n_cities;
+                }
+                if (!okx || !oky)
+                    penalty++;
+            }
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 1)
+                        okx = true;
+                    if (y1 != 1)
+                        oky = true;
+                    curr = (curr + n_cities - 1) % n_cities;
+                }
+                if (!okx || !oky)
+                    penalty++;
+            }
+
+        } else if (path[i] == corner2) {
+            cnt++;
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 255)
+                        okx = true;
+                    if (y1 != 255)
+                        oky = true;
+                    curr = (curr + 1) % n_cities;
+                }
+                if (!okx || !oky)
+                    penalty++;
+            }
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 255)
+                        okx = true;
+                    if (y1 != 255)
+                        oky = true;
+                    curr = (curr + n_cities - 1) % n_cities;
+                }
+                if (!okx || !oky)
+                    penalty++;
+            }
+        }
+        if (cnt == 3)
+            break;
+    }
+    vector<vector<int>> quadcnt(n_cities + 300, vector<int>(4, 0));
+    for (int i = 0; i < n_cities; i++) {
+        int q = quadrant(path[i]);
+        quadcnt[i][q]++;
+        quadcnt[i + 257][q]--;
+    }
+    for (int i = 0; i < n_cities; i++) {
+		int qs = 0;
+        for (int q = 0; q < 4; ++q) {
+            quadcnt[i + 1][q] += quadcnt[i][q];
+			if (quadcnt[i + 1][q] > 0)
+				qs++;
+        }
+		if (qs == 4) {
+			penalty++;
+			break;
+		}
+    }
+
+    return penalty * Magnification;
+}
+
 int128 total_cost(vector<int>& path) {
     int128 cost = 0;
     for (size_t i = 0; i < path.size() - 1; i++) {
         cost += weight(path[i], path[i + 1]);
     }
     cost += weight(path[path.size() - 1], path[0]);
+    cost += penalty(path);
     return cost;
 }
 
@@ -92,7 +261,7 @@ int main(int argc, char* argv[]) {
     int n_cities = 257 * 257;
 
     cout << "\n ***** Example: recombination of all paths from file ****" << endl;
-
+	cout << "Magnification " << Magnification << endl;
     vector<int> p3(n_cities, 1);
     vector<int> p4(n_cities, 1);
 
@@ -100,20 +269,26 @@ int main(int argc, char* argv[]) {
     p3 = paths[0];
     vector<int> offspring2(n_cities, 0);
     // rand_init(p1, p2);  // random initialization of the parents
-    int128 best_cost = total_cost(p3);
+    string best_cost_str = "7407570654169005380529794198251561821613";
+    int128 best_cost = parse(best_cost_str);
     // Recombination by GPX2
-    for (int i = 0; i < paths.size() - 1; ++i) {
-        cout << "path: " << i + 1 << endl;
-        p4 = paths[i + 1];
-        cout << "init cost1: " << total_cost(p3) << endl;
-        cout << "init cost2: " << total_cost(p4) << endl;
-        cost = gpx(p3, p4, offspring2);
-        cout << "new cost  : " << cost << endl;
-        p3 = offspring2;
-        if (cost < best_cost) {
-            // write_path_to_file("./output/" + to_string_int128(cost) + ".txt", offspring2);
-            write_path_to_file("./output/best.txt", offspring2);
-            best_cost = cost;
+    for (int ii = 0; ii < paths.size(); ii++) {
+        for (int i = ii + 1; i < paths.size() - 1; ++i) {
+            p3 = paths[ii];
+            p4 = paths[i];
+            cout << "init cost1      : " << total_cost(p3) << endl;
+            cout << "init cost2      : " << total_cost(p4) << endl;
+            cost = gpx(p3, p4, offspring2);
+            cout << "new cost (raw)  : " << cost << endl;
+            int128 cost_restrictions = total_cost(offspring2);
+            cout << "new cost        : " << cost_restrictions << endl;
+            p3 = offspring2;
+            if (cost < best_cost) {
+                cout << "best score updated !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! save results." << endl;
+                // write_path_to_file("./output/" + to_string_int128(cost) + ".txt", offspring2);
+                write_path_to_file("./output/best.txt", offspring2);
+                best_cost = cost;
+            }
         }
     }
 
