@@ -31,8 +31,8 @@ namespace cap3_autoreferencia {
 		void insere (const T& x);  
 		// @{\it Insere antes do primeiro item da lista}@
 	  void inserePrimeiro (T& item);
-		T *retira (const T& chave) throw ( logic_error );
-		T *retiraPrimeiro () throw ( logic_error );
+		T *retira (const T& chave); // throw ( logic_error );
+		T *retiraPrimeiro (); // throw ( logic_error );
     T *_primeiro ();
     T *proximo ();
 		bool vazia () const;
@@ -69,8 +69,8 @@ namespace cap3_autoreferencia {
 	  return 0;
 	}	
 	template <class T>	
-	T *Lista<T>::retira (const T& chave) throw ( logic_error ) {
-	  if (this->vazia ()) throw logic_error ("Erro: A lista esta vazia");
+	T *Lista<T>::retira (const T& chave) {
+	//   if (this->vazia ()) throw logic_error ("Erro: A lista esta vazia");
 	  Celula *aux = this->primeiro;
 	  while (aux->prox != 0 && *(aux->prox->item) != chave) aux=aux->prox;
 	  if (aux->prox == 0) return 0; 
@@ -81,8 +81,8 @@ namespace cap3_autoreferencia {
 	  delete q; return item;
 	}		
 	template <class T>	
-	T *Lista<T>::retiraPrimeiro () throw ( logic_error ) {
-	  if (this->vazia ()) throw logic_error ("Erro: A lista esta vazia");
+	T *Lista<T>::retiraPrimeiro () {
+	//   if (this->vazia ()) throw logic_error ("Erro: A lista esta vazia");
 	  Celula *aux = this->primeiro;
 	  Celula *q = aux->prox;
 	  T *item = q->item; aux->prox = q->prox;
