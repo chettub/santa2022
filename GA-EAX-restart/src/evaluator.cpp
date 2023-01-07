@@ -15,12 +15,12 @@ pair<int, int> decode(int i) {
     return make_pair(i / 257, i % 257);
 }
 int encodesmall(int dx, int dy) {
-    dx += 8;
-    dy += 8;
-    return dx * 17 + dy;
+    dx += 16;
+    dy += 16;
+    return dx * 33 + dy;
 }
 pair<int, int> decodesmall(int i) {
-    return make_pair((i / 17) - 8, (i % 17) - 8);
+    return make_pair((i / 33) - 16, (i % 33) - 16);
 }
 bool checkin(int x, int y) {
     return x == clamp(x, 0, 256) && y == clamp(y, 0, 256);
@@ -111,8 +111,8 @@ void TEvaluator::setInstance(char filename[]) {
 
         fEdgeDis = new ll*[Ncity];
         for (ll i = 0; i < Ncity; ++i) {
-            fEdgeDis[i] = new ll[17 * 17];
-            for (int j = 0; j < 17 * 17; j++) {
+            fEdgeDis[i] = new ll[33 * 33];
+            for (int j = 0; j < 33 * 33; j++) {
                 fEdgeDis[i][j] = INF * Magnification;
             }
         }
@@ -120,16 +120,22 @@ void TEvaluator::setInstance(char filename[]) {
         for (int x1 = 0; x1 < Len; x1++) {
             for (int y1 = 0; y1 < Len; y1++) {
                 int idx1 = encode(x1, y1);
-                for (int dx = -8; dx <= 8; dx++) {
-                    for (int dy = -8; dy <= 8; dy++) {
-                        if (abs(dx) + abs(dy) > 8)
+                for (int dx = -16; dx <= 16; dx++) {
+                    for (int dy = -16; dy <= 16; dy++) {
+                        if (abs(dx) + abs(dy) > 16)
                             continue;
                         int x2 = x1 + dx;
                         int y2 = y1 + dy;
                         if (!checkin(x2, y2))
                             continue;
                         int idx2 = encodesmall(dx, dy);
-                        fEdgeDis[idx1][idx2] = (ll)(0.5 + Magnification * (sqrt(abs(dx) + abs(dy)) + 3 * (abs(Image[x1][y1][0] - Image[x2][y2][0]) + abs(Image[x1][y1][1] - Image[x2][y2][1]) + abs(Image[x1][y1][2] - Image[x2][y2][2]))));
+                        double reconfiguration;
+                        if (abs(dx) + abs(dy) <= 8)
+                            reconfiguration = sqrt(abs(dx) + abs(dy));
+                        else
+                            reconfiguration = sqrt(8) + sqrt(abs(dx) + abs(dy) - 8);
+
+                        fEdgeDis[idx1][idx2] = (ll)(0.5 + Magnification * (reconfiguration + 3 * (abs(Image[x1][y1][0] - Image[x2][y2][0]) + abs(Image[x1][y1][1] - Image[x2][y2][1]) + abs(Image[x1][y1][2] - Image[x2][y2][2]))));
                     }
                 }
             }
@@ -137,8 +143,8 @@ void TEvaluator::setInstance(char filename[]) {
 
         // 初期移動制限
         // (0,-1) -> (0,0) -> (0,1)
-        for (int dx = -8; dx <= 8; dx++) {
-            for (int dy = -8; dy <= 8; dy++) {
+        for (int dx = -16; dx <= 16; dx++) {
+            for (int dy = -16; dy <= 16; dy++) {
                 if (dx == 0 && abs(dy) == 1)
                     continue;
                 {
@@ -310,7 +316,7 @@ ll TEvaluator::funcEdgeDis(int i, int j) {
         auto [x2, y2] = decode(j);
         int dx = x2 - x1;
         int dy = y2 - y1;
-        if (abs(dx) + abs(dy) > 8)
+        if (abs(dx) + abs(dy) > 16)
             return INF * Magnification;
         int idx1 = encode(x1, y1);
         int idx2 = encodesmall(dx, dy);
