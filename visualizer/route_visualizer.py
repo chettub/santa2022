@@ -70,7 +70,8 @@ p.image_rgba(image=[img_plt], x=-128.5, y=-128.5, dw=257, dh=257, alpha=alpha)
 
 # get paths from bestSolution.txt (output file of GA-EAX)
 uploaded_file = st.sidebar.file_uploader("Choose route file (bestSolution.txt)")
-is_color = st.sidebar.checkbox("Plot colored line")
+# is_color = st.sidebar.checkbox("Plot colored line")
+color_type = st.sidebar.selectbox("Plot color type", ["simple", "progress", "distance"])
 
 if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
@@ -116,11 +117,11 @@ if uploaded_file is not None:
         pathnp = np.array(path)
         pathnp = pathnp[path_range[0]:path_range[1]]
 
-        if not is_color:
+        if color_type == "simple":
             s = ColumnDataSource({"xpos": pathnp[:, 0], "ypos": pathnp[:, 1], "index": pathnp[:, 2]})
             p.line("xpos", "ypos", source=s)
             p.scatter("xpos", "ypos", source=s, size=1.5)
-        else:
+        elif color_type == "progress":
             s = ColumnDataSource({"xposs": [pathnp[i:i+2, 0] for i in range(pathnp.shape[0]-1)], "yposs": [pathnp[i:i+2, 1] for i in range(pathnp.shape[0]-1)], "color": pathnp[:, 2] / pathnp.shape[0], "index": pathnp[:, 2],
                                     "xpos": pathnp[:, 0], "ypos": pathnp[:,1]})
             color_mapper = LinearColorMapper(palette=colorcet.rainbow4, low=np.min(pathnp[:, 2]), high=np.max(pathnp[:, 2]))
@@ -128,6 +129,17 @@ if uploaded_file is not None:
             cb = ColorBar(color_mapper=color_mapper)
             p.add_glyph(s, glyph)
             p.add_layout(cb, "right")
+        elif color_type == "distance":
+            min_dist = st.sidebar.slider("min_dist", min_value=1, max_value=16, value=2)
+            dists = np.array([np.abs(pathnp[i+1,0]-pathnp[i,0])+np.abs(pathnp[i+1,1]-pathnp[i,1]) for i in range(pathnp.shape[0]-1)])
+            s = ColumnDataSource({"xposs": [pathnp[i:i+2, 0] for i in range(pathnp.shape[0]-1) if dists[i] >= min_dist], "yposs": [pathnp[i:i+2, 1] for i in range(pathnp.shape[0]-1) if dists[i] >= min_dist], "color": [dists[i] for i in range(len(dists)) if dists[i] >= min_dist], "index": pathnp[:-1, 2][dists >= min_dist],
+                                    "xpos": pathnp[:-1, 0][dists >= min_dist], "ypos": pathnp[:-1,1][dists >= min_dist]})
+            color_mapper = LinearColorMapper(palette=colorcet.rainbow4, low=1, high=10)
+            glyph = MultiLine(xs="xposs", ys="yposs", line_color={"field": "color", "transform": color_mapper}, line_width=1)
+            cb = ColorBar(color_mapper=color_mapper)
+            p.add_glyph(s, glyph)
+            p.add_layout(cb, "right")
+
         
         st.sidebar.download_button("Download this solution", f"""{lengths[idx]} {int(scores[idx]*1000000)}\n{' '.join([str(p) for p in paths[idx]])}""", file_name=f"{idx}_{float(score)}.txt")
     else: # comparison mode
