@@ -5,7 +5,7 @@ using lint = long long;
 class XorShift {
     uint32_t x, y, z, w, t;
 
-  public:
+public:
     XorShift() {
         x = 133553533;
         y = 314867339;
@@ -87,12 +87,12 @@ void addEdge(int i, int j) {
     int cnt = edge_count[i][j];
     long double r = 0.0;
     if (cnt != 0) {
-        r = (long double)(cnt) * over_npop;
+        r = (long double)(cnt)*over_npop;
         entropy -= r * log_fast(r);
     }
     edge_count[i][j]++;
     cnt++;
-    r = (long double)(cnt) * over_npop;
+    r = (long double)(cnt)*over_npop;
     entropy += r * log_fast(r);
 }
 
@@ -100,14 +100,14 @@ void removeEdge(int i, int j) {
     int cnt = edge_count[i][j];
     long double r = 0.0;
     if (cnt != 0) {
-        r = (long double)(cnt) * over_npop;
+        r = (long double)(cnt)*over_npop;
         entropy -= r * log_fast(r);
     }
     edge_count[i][j]--;
     assert(edge_count[i][j] >= 0);
     cnt--;
     if (cnt != 0) {
-        r = (long double)(cnt) * over_npop;
+        r = (long double)(cnt)*over_npop;
         entropy += r * log_fast(r);
     }
 }
@@ -142,12 +142,260 @@ long double funcEdgeDis(int i, int j) {
     return fEdgeDis[idx1][idx2];
 }
 
+int quadrant(int x, int y) {
+    if (x > 128 && y > 128)
+        return 1;
+    else if (x < 128 && y > 128)
+        return 2;
+    else if (x < 128 && y < 128)
+        return 3;
+    else if (x > 128 && y < 128)
+        return 4;
+    else
+        return 0;
+}
+
+int quadrant(int idx) {
+    auto [x, y] = decode(idx);
+    return quadrant(x, y);
+}
+
+double penalty(vector<int>& path) {
+    int center = encode(128, 128);
+    int corner1 = encode(1, 1);
+    int corner2 = encode(255, 255);
+
+    double penalty = 0;
+
+    int cnt = 0;
+    for (int i = 0; i < path.size(); i++) {
+        if (path[i] == center) {
+            cnt++;
+            {
+                int cntyplus = 0, cntyminus = 0;
+                int cntxplus = 0, cntxminus = 0;
+                int curr = i;
+                int next = (curr + 1) % n_city;
+                while (true) {
+                    auto [x1, y1] = decode(path[curr]);
+                    auto [x2, y2] = decode(path[next]);
+                    cntxplus += x2 > x2;
+                    cntxminus += x2 < x1;
+                    if (x2 < 128) {
+                        penalty++;
+                        // cout << "x < 0 pen" << endl;
+                        break;
+                    }
+                    if ((cntyplus + cntyminus) * 2 < cntxplus) {
+                        penalty++;
+                        // cout << "x > 2*y pen" << endl;
+                        break;
+                    }
+                    cntyplus += y2 > y1;
+                    cntyminus += y2 > y1;
+                    if (cntyplus >= 64 && cntyminus >= 64)
+                        break;
+                    curr = (curr + 1) % n_city;
+                    next = (next + 1) % n_city;
+                }
+            }
+            {
+                int cntyplus = 0, cntyminus = 0;
+                int cntxplus = 0, cntxminus = 0;
+                int curr = i;
+                int next = (curr + n_city - 1) % n_city;
+                while (true) {
+                    auto [x1, y1] = decode(path[curr]);
+                    auto [x2, y2] = decode(path[next]);
+                    cntxplus += x2 > x2;
+                    cntxminus += x2 < x1;
+                    if (x2 < 128) {
+                        penalty++;
+                        // cout << "x < 0 pen" << endl;
+                        break;
+                    }
+                    if ((cntyplus + cntyminus) * 2 < cntxplus) {
+                        penalty++;
+                        // cout << "x > 2*y pen" << endl;
+                        break;
+                    }
+                    cntyplus += y2 > y1;
+                    cntyminus += y2 > y1;
+                    if (cntyplus >= 64 && cntyminus >= 64)
+                        break;
+                    curr = (curr + n_city - 1) % n_city;
+                    next = (next + n_city - 1) % n_city;
+                }
+            }
+        } else if (path[i] == corner1) {
+            cnt++;
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 1)
+                        okx = true;
+                    if (y1 != 1)
+                        oky = true;
+                    curr = (curr + 1) % n_city;
+                }
+                if (!okx || !oky) {
+                    penalty++;
+                    // cout << "1, 1 pen" << endl;
+                }
+            }
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 255; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 1)
+                        okx = true;
+                    if (y1 != 1)
+                        oky = true;
+                    curr = (curr + n_city - 1) % n_city;
+                }
+                if (!okx || !oky) {
+                    penalty++;
+                    // cout << "1, 1 pen" << endl;
+                }
+            }
+
+        } else if (path[i] == corner2) {
+            cnt++;
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 254; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 255)
+                        okx = true;
+                    if (y1 != 255)
+                        oky = true;
+                    curr = (curr + 1) % n_city;
+                }
+                if (!okx || !oky) {
+                    penalty++;
+                    // cout << "255, 255 pen" << endl;
+                }
+            }
+            {
+                bool okx = false, oky = false;
+                int curr = i;
+                for (int j = 0; j < 254; ++j) {
+                    auto [x1, y1] = decode(path[curr]);
+                    if (x1 != 255)
+                        okx = true;
+                    if (y1 != 255)
+                        oky = true;
+                    curr = (curr + n_city - 1) % n_city;
+                }
+                if (!okx || !oky) {
+                    penalty++;
+                    // cout << "255, 255 pen" << endl;
+                }
+            }
+        }
+        if (cnt == 3)
+            break;
+    }
+    for (int i = 0; i < 2; ++i) {
+        int xnow, xbef, ynow, ybef;
+        int now, bef;
+        if (i == 0) {
+            xnow = 128;
+            xbef = 128 + 1;
+            ynow = 128 - 4;
+            ybef = 128 - 4;
+        } else if (i == 1) {
+            xnow = 128;
+            xbef = 128 + 1;
+            ynow = 128 - 5;
+            ybef = 128 - 5;
+        } else {
+            assert(false);
+        }
+        now = encode(xnow, ynow);
+        bef = encode(xbef, ybef);
+        int inow = -1;
+        int ibef = -1;
+        for (int j = 0; j < n_city; ++j) {
+            if (path[j] == now)
+                inow = j;
+            if (path[j] == bef)
+                ibef = j;
+        }
+        if (abs(inow - ibef) != 1) {
+            continue;
+        }
+        int dir = inow - ibef;
+        int cntyplus = 0;
+        vector<bool> isinquad(5, false);
+        for (int j = 0; j < 2000; j++) {
+            ibef = inow;
+            inow = (inow + n_city + dir) % n_city;
+            now = path[inow];
+            bef = path[ibef];
+            auto [xnow, ynow] = decode(now);
+            auto [xbef, ybef] = decode(bef);
+            int nowquad = quadrant(now);
+            isinquad[nowquad] = true;
+
+            if (isinquad[4])
+                break;
+            if (isinquad[1]) {
+                if (isinquad[2] || isinquad[3])
+                    penalty++;
+                break;
+            }
+            cntyplus += ynow > ybef;
+            if (cntyplus >= 128)
+                break;
+        }
+    }
+    // vector<vector<int>> quadcnt(n_city + 300, vector<int>(5, 0));
+    // vector<int> yplus(n_city + 300, 0);
+    // vector<int> yminus(n_city + 300, 0);
+    // vector<int> xplus(n_city + 300, 0);
+    // vector<int> yminus(n_city + 300, 0);
+    // for (int i = 0; i < n_city; i++) {
+    //     int q = quadrant(path[i]);
+    //     quadcnt[i][q]++;
+    //     quadcnt[i + 256][q]--;
+    //     if (i != 0) {
+    //         auto [cx, cy] = decode(path[i]);
+    //         auto [px, py] = decode(path[i - 1]);
+    // 		yplus[i] = cy - py > 0;
+    // 		yminus[i] = cy - py < 0;
+    // 		xplus[i] = cx - px > 0;
+    // 		xminus[i] = cx - px > 0;
+    //     }
+    // }
+    // for (int i = 0; i < n_city + 256; i++) {
+    //     int qs = 0;
+    //     for (int q = 1; q < 5; ++q) {
+    //         quadcnt[i + 1][q] += quadcnt[i][q];
+    //         if (quadcnt[i + 1][q] > 0)
+    //             qs++;
+    //     }
+    //     if (qs == 4) {
+    //         penalty++;
+    //         cout << "quad pen at " << i << endl;
+    //         break;
+    //     }
+    // }
+
+    return penalty;
+}
+
 long double totalCost(vector<int>& path) {
     long double cost = 0.0;
     for (int i = 0; i < path.size() - 1; i++) {
         cost += funcEdgeDis(path[i], path[i + 1]);
     }
     cost += funcEdgeDis(path[path.size() - 1], path[0]);
+    cost += penalty(path);
     return cost;
 }
 
