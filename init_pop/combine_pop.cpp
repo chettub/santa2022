@@ -49,17 +49,17 @@ bool checkin(int x, int y) {
     return x == clamp(x, 0, 256) && y == clamp(y, 0, 256);
 }
 
-constexpr double inf = 100.0;
+constexpr long double inf = 100.0;
 constexpr int len = 257;
 constexpr int n_city = len * len;
 constexpr int center = 128;
 
-double average_cost = 0.0;
-double entropy = 0.0;
+long double average_cost = 0.0;
+long double entropy = 0.0;
 vector<map<int, int>> edge_count(n_city);
-double over_npop;
-vector<vector<vector<double>>> image(len, vector<vector<double>>(len, vector<double>(3, 0.0)));
-vector<vector<double>> fEdgeDis(n_city, vector<double>(17 * 17, inf));
+long double over_npop;
+vector<vector<vector<long double>>> image(len, vector<vector<long double>>(len, vector<long double>(3, 0.0)));
+vector<vector<long double>> fEdgeDis(n_city, vector<long double>(17 * 17, inf));
 XorShift rnd;
 
 vector<int> string_to_vector_int(string& str, const char delim = ' ') {
@@ -78,37 +78,37 @@ vector<int> string_to_vector_int(string& str, const char delim = ' ') {
     return vec;
 }
 
-inline double log(double x) {
-    double xm1 = x - 1.0;
+inline long double log_fast(long double x) {
+    long double xm1 = x - 1.0;
     return xm1 * (1.0 - xm1 * (0.5 - 0.333333 * xm1));
 }
 
 void addEdge(int i, int j) {
     int cnt = edge_count[i][j];
-    double r = 0.0;
+    long double r = 0.0;
     if (cnt != 0) {
-        r = double(cnt) * over_npop;
-        entropy -= r * log(r);
+        r = (long double)(cnt) * over_npop;
+        entropy -= r * log_fast(r);
     }
     edge_count[i][j]++;
     cnt++;
-    r = double(cnt) * over_npop;
-    entropy += r * log(r);
+    r = (long double)(cnt) * over_npop;
+    entropy += r * log_fast(r);
 }
 
 void removeEdge(int i, int j) {
     int cnt = edge_count[i][j];
-    double r = 0.0;
+    long double r = 0.0;
     if (cnt != 0) {
-        r = double(cnt) * over_npop;
-        entropy -= r * log(r);
+        r = (long double)(cnt) * over_npop;
+        entropy -= r * log_fast(r);
     }
     edge_count[i][j]--;
     assert(edge_count[i][j] >= 0);
     cnt--;
     if (cnt != 0) {
-        r = double(cnt) * over_npop;
-        entropy += r * log(r);
+        r = (long double)(cnt) * over_npop;
+        entropy += r * log_fast(r);
     }
 }
 
@@ -130,7 +130,7 @@ void removeEdgeAll(vector<int>& route) {
     removeEdge(route[0], route[n_city - 1]);
 }
 
-double funcEdgeDis(int i, int j) {
+long double funcEdgeDis(int i, int j) {
     auto [x1, y1] = decode(i);
     auto [x2, y2] = decode(j);
     int dx = x2 - x1;
@@ -142,8 +142,8 @@ double funcEdgeDis(int i, int j) {
     return fEdgeDis[idx1][idx2];
 }
 
-double totalCost(vector<int>& path) {
-    double cost = 0.0;
+long double totalCost(vector<int>& path) {
+    long double cost = 0.0;
     for (int i = 0; i < path.size() - 1; i++) {
         cost += funcEdgeDis(path[i], path[i + 1]);
     }
@@ -155,7 +155,7 @@ void write_path_to_file(string file, vector<int>& path) {
     ofstream f;
     f.open(file, ios::app);
     f << path.size() << " ";
-    double cost = totalCost(path);
+    long double cost = totalCost(path);
     f << setprecision(15) << cost << endl;
     for (auto const& p : path) {
         f << p + 1 << " ";
@@ -170,7 +170,7 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
     char* imagepath = argv[1];
-    double temperature = atof(argv[2]);
+    long double temperature = atof(argv[2]);
     int npop = atoi(argv[3]);
     int nsearch = atoi(argv[4]);
 
@@ -208,8 +208,8 @@ int main(int argc, char* argv[]) {
     }
 
 
-    vector<pair<double, vector<int>>> pop;
-    over_npop = 1.0 / (double)npop;
+    vector<pair<long double, vector<int>>> pop;
+    over_npop = 1.0 / (long double)npop;
 
     for (int i = 5; i < argc; i++) {
         string file_path = argv[i];
@@ -228,7 +228,7 @@ int main(int argc, char* argv[]) {
             getline(ifs, str_buf);
             vector<int> route = string_to_vector_int(str_buf, ' ');
             assert(route.size() == n_city);
-            double cost = totalCost(route);
+            long double cost = totalCost(route);
             // cerr << cnt << " " << cost << endl;
 
 
@@ -237,16 +237,16 @@ int main(int argc, char* argv[]) {
                 pop.emplace_back(cost, route);
                 addEdgeAll(route);
             } else {  // greedy, choose subset with smallest F = E - TH
-                double smallest_f = average_cost - temperature * entropy;
+                long double smallest_f = average_cost - temperature * entropy;
                 int best_idx = -1;
                 average_cost += cost * over_npop;
                 addEdgeAll(route);
                 // for (int l = 0; l < npop; l++) {
-                for (int z = 0; z < n_search; ++z) {
+                for (int z = 0; z < nsearch; ++z) {
                     int l = rnd(npop);
                     removeEdgeAll(pop[l].second);
                     average_cost -= pop[l].first * over_npop;
-                    double f = average_cost - temperature * entropy;
+                    long double f = average_cost - temperature * entropy;
                     // cerr << l << " " << setprecision(10) << average_cost << " " <<  entropy << endl;
                     if (f < smallest_f) {
                         smallest_f = f;
@@ -258,16 +258,16 @@ int main(int argc, char* argv[]) {
                 // cerr << best_idx << endl;
                 if (best_idx == -1) {
                     removeEdgeAll(route);
-                    average_cost -= (double)cost * over_npop;
+                    average_cost -= (long double)cost * over_npop;
                     // continue;
                 } else {
                     average_cost -= pop[best_idx].first * over_npop;
                     removeEdgeAll(pop[best_idx].second);
-                    pair<double, vector<int>> newpath = {cost, route};
+                    pair<long double, vector<int>> newpath = {cost, route};
                     pop[best_idx] = newpath;
                 }
             }
-            cerr << cnt << " " << setprecision(10) << average_cost << " " << average_cost - temperature * entropy << endl;
+            cerr << cnt << " " << setprecision(15) << average_cost << " " << average_cost - temperature * entropy << endl;
         }
     }
     cerr << "write results to file.." << endl;
