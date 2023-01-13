@@ -267,7 +267,7 @@ void TEnvironment::init() {
     cout << "starting from stage " << fStage << endl;
     fCurNumOfGen1 = 0;
     fFlagC[0] = 4; /* Diversity preservation: 1:Greedy, 2:--- , 3:Distance, 4:Entropy (see Section 4) */
-    fFlagC[1] = 1; /* Eset Type: 1:Single-AB, 2:Block2 (see Section 3) */
+    fFlagC[1] = fStage; /* Eset Type: 1:Single-AB, 2:Block2 (see Section 3) */
 }
 
 bool TEnvironment::terminationCondition() {
