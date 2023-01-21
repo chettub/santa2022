@@ -1,1 +1,0 @@
-g++ combine_pop.cpp -o combine_pop.out -O3 -std=c++17
