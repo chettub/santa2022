@@ -1,6 +1,8 @@
 ### Introduction
 We modified GA-EAX [[Nagata, Y., & Kobayashi, S. (2013)](https://doi.org/10.1287/ijoc.1120.0506)] for this competition.
 The code is mainly based on [GA-EAX-restart](https://github.com/senshineL/GA-EAX-restart), however we are assuming that the original code was based on the supplementary code of [Nagata, Y., & Kobayashi, S. (2013)](https://doi.org/10.1287/ijoc.1120.0506) as some of the variable names are in Japanese.
+#### Update 2023/07/08
+The original code seems to be [nagata-yuichi/GA-EAX](https://github.com/nagata-yuichi/GA-EAX).
 
 
 ### Differences from [GA-EAX-restart](https://github.com/senshineL/GA-EAX-restart)
